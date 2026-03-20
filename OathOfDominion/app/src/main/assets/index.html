@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Oath of Dominion</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --f1:#ff2200;--f2:#ff6600;--f3:#ffaa00;--f4:#ffdd44;
+  --lava:#cc1100;--stone:#1a0a00;--stone2:#2a1400;--char:#0d0400;
+  --gold:#e8a020;--gold2:#ffd060;
+  --txt:#f5d8b0;--txt2:#c8a070;--muted:#7a4020;
+  --bdr:#3d1f00;--bdr2:#6b3010;
+  --grn:#44ff88;--blu:#4488ff;--pur:#cc44ff;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow-x:hidden;}
+body{background:var(--char);color:var(--txt);font-family:'Cinzel',serif;
+  -webkit-font-smoothing:antialiased;-webkit-overflow-scrolling:touch;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 100% 60% at 50% 110%,rgba(180,30,0,.85) 0%,transparent 70%),
+    radial-gradient(ellipse 50% 40% at 20% 80%,rgba(100,15,0,.45) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 80%,rgba(100,15,0,.45) 0%,transparent 60%);}
+.emb{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.ep{position:absolute;bottom:-10px;border-radius:50%;animation:rise linear infinite;opacity:0;}
+@keyframes rise{0%{transform:translateY(0) translateX(0) scale(1);opacity:.8;}50%{opacity:.5;}100%{transform:translateY(-110vh) translateX(var(--dx)) scale(0);opacity:0;}}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:300;height:60px;
+  background:rgba(10,4,0,.97);border-bottom:1px solid var(--bdr2);
+  box-shadow:0 2px 24px rgba(255,60,0,.18);
+  display:flex;align-items:center;gap:1rem;padding:0 1rem;}
+header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--f2),var(--f3),var(--f2),transparent);}
+.logo-w{display:flex;align-items:center;gap:.6rem;flex-shrink:0;}
+.logo-svg{width:38px;height:38px;filter:drop-shadow(0 0 8px var(--f2));}
+.logo-t{display:flex;flex-direction:column;line-height:1.1;}
+.logo-t .top{font-size:.55rem;letter-spacing:3px;color:var(--f3);font-family:'Cinzel Decorative',serif;}
+.logo-t .bot{font-size:.85rem;letter-spacing:2px;color:var(--gold2);font-family:'Cinzel Decorative',serif;
+  text-shadow:0 0 16px rgba(232,160,32,.4);}
+.hsp{flex:1;}
+.wallet-btn{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;
+  padding:7px 12px;border:1px solid var(--f2);background:rgba(255,80,0,.1);color:var(--f3);
+  cursor:pointer;transition:all .2s;white-space:nowrap;}
+.wallet-btn.ok{border-color:var(--grn);color:var(--grn);background:rgba(68,255,136,.06);}
+.wallet-btn:active{opacity:.7;}
+.live-p{display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;
+  font-size:.55rem;letter-spacing:2px;color:var(--f3);border:1px solid rgba(255,100,0,.25);
+  background:rgba(255,60,0,.07);padding:4px 8px;flex-shrink:0;}
+.ld{width:5px;height:5px;border-radius:50%;background:var(--f3);animation:lp 1.2s ease-in-out infinite;}
+@keyframes lp{0%,100%{opacity:1;box-shadow:0 0 5px var(--f2)}50%{opacity:.2;box-shadow:none}}
+
+/* STATUS BAR */
+.api-bar{background:rgba(20,6,0,.9);border-bottom:1px solid var(--bdr);
+  padding:4px 1rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;}
+.api-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.api-dot.ok{background:var(--grn);box-shadow:0 0 6px var(--grn);}
+.api-dot.err{background:var(--f1);box-shadow:0 0 6px var(--f1);}
+.api-dot.load{background:var(--f3);animation:lp 1s infinite;}
+.api-lbl{font-family:'JetBrains Mono',monospace;font-size:.52rem;color:var(--muted);letter-spacing:1px;}
+.api-lbl span{color:var(--txt2);}
+
+/* NAV */
+.nav{position:sticky;top:60px;z-index:250;background:rgba(8,3,0,.97);
+  border-bottom:1px solid var(--bdr);display:flex;overflow-x:auto;
+  scrollbar-width:none;-ms-overflow-style:none;}
+.nav::-webkit-scrollbar{display:none;}
+.nt{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;
+  padding:.8rem 1rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;
+  transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.nt:active{background:rgba(255,60,0,.05);}
+.nt.on{color:var(--f3);border-bottom-color:var(--f2);text-shadow:0 0 12px rgba(255,120,0,.4);}
+.nbadge{font-family:'JetBrains Mono',monospace;font-size:.45rem;background:var(--f2);
+  color:#000;padding:1px 4px;border-radius:1px;margin-left:4px;vertical-align:middle;}
+
+/* LAYOUT */
+.layout{position:relative;z-index:1;display:flex;min-height:calc(100vh - 120px);}
+
+/* SIDEBAR */
+.sidebar{width:280px;flex-shrink:0;border-right:1px solid var(--bdr);
+  background:rgba(8,3,0,.92);display:flex;flex-direction:column;
+  position:sticky;top:120px;height:calc(100vh - 120px);overflow:hidden;}
+.sbt{padding:.75rem;border-bottom:1px solid var(--bdr);flex-shrink:0;display:flex;flex-direction:column;gap:.5rem;}
+.ft{font-family:'Cinzel Decorative',serif;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;
+  background:linear-gradient(90deg,var(--f2),var(--f4),var(--f2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.si-w{position:relative;}
+.si{width:100%;background:rgba(25,8,0,.8);border:1px solid var(--bdr2);color:var(--txt);
+  font-family:'JetBrains Mono',monospace;font-size:.75rem;padding:.5rem .7rem .5rem 1.8rem;
+  outline:none;-webkit-appearance:none;}
+.si:focus{border-color:var(--f2);}
+.si::placeholder{color:var(--muted);}
+.sico2{position:absolute;left:.55rem;top:50%;transform:translateY(-50%);color:var(--f2);font-size:.75rem;}
+.chips{display:flex;gap:.35rem;flex-wrap:wrap;}
+.chip{font-family:'JetBrains Mono',monospace;font-size:.48rem;letter-spacing:1px;text-transform:uppercase;
+  padding:3px 7px;border:1px solid var(--bdr2);background:none;color:var(--muted);cursor:pointer;}
+.chip.on{color:var(--f3);border-color:var(--f2);background:rgba(255,80,0,.08);}
+
+/* MOKI LIST */
+.mscroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
+.mi{display:flex;align-items:center;gap:.6rem;padding:.65rem .85rem;
+  border-bottom:1px solid rgba(61,31,0,.5);cursor:pointer;transition:background .1s;position:relative;}
+.mi:active{background:rgba(255,50,0,.08);}
+.mi.sel{background:rgba(255,80,0,.09);border-left:2px solid var(--f2);padding-left:calc(.85rem - 2px);}
+.mi.hot::after{content:'🔥';position:absolute;right:.5rem;top:.4rem;font-size:.6rem;}
+.mrk{font-family:'Cinzel',serif;font-size:.85rem;color:var(--muted);min-width:20px;text-align:center;flex-shrink:0;}
+.mrk.t1{color:var(--f4);text-shadow:0 0 8px var(--f3);}
+.mrk.t3{color:var(--f2);}
+.mth{width:34px;height:34px;border-radius:3px;overflow:hidden;background:var(--stone2);
+  border:1px solid var(--bdr2);flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:1rem;position:relative;}
+.mth img{width:100%;height:100%;object-fit:cover;}
+.rdot{position:absolute;bottom:1px;right:1px;width:5px;height:5px;border-radius:50%;}
+.mm{flex:1;min-width:0;}
+.mn{font-family:'Cinzel',serif;font-size:.72rem;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ms{font-family:'JetBrains Mono',monospace;font-size:.52rem;color:var(--muted);margin-top:1px;}
+.mpt{font-family:'Cinzel',serif;font-size:1rem;text-align:right;flex-shrink:0;}
+.ph{color:var(--grn);text-shadow:0 0 6px rgba(68,255,136,.35);}
+.pw{color:var(--f3);}
+.pc{color:var(--muted);}
+
+/* MAIN */
+.main{flex:1;min-width:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.page{display:none;}.page.on{display:block;}
+
+/* OVERVIEW HERO (empty state) */
+.ov-hero{padding:1.5rem;background:linear-gradient(180deg,rgba(28,8,0,.9) 0%,rgba(8,3,0,.95) 100%);
+  border-bottom:1px solid var(--bdr);display:flex;gap:1.5rem;align-items:center;
+  position:relative;overflow:hidden;}
+.ov-hero::before{content:'';position:absolute;inset:0;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ff3300' fill-opacity='1' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");}
+.demon-glow{position:relative;flex-shrink:0;}
+.demon-glow::before{content:'';position:absolute;inset:-15px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,80,0,.18) 0%,transparent 70%);
+  animation:gp 2.5s ease-in-out infinite;}
+@keyframes gp{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.12);opacity:.65}}
+.dsv{width:80px;height:80px;filter:drop-shadow(0 0 16px var(--f2)) drop-shadow(0 0 32px rgba(255,100,0,.3));}
+.hi{flex:1;}
+.hg{font-family:'Cinzel Decorative',serif;font-size:.55rem;letter-spacing:3px;color:var(--f2);}
+.ht{font-family:'Cinzel Decorative',serif;font-size:1.3rem;line-height:1.15;
+  background:linear-gradient(135deg,var(--f3) 0%,var(--f4) 50%,var(--gold2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:.3rem 0;}
+.hs2{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt2);line-height:1.6;}
+.hst{display:flex;gap:1.2rem;margin-top:.75rem;}
+.hstv{font-family:'Cinzel',serif;font-size:1.3rem;color:var(--f3);}
+.hstl{font-family:'JetBrains Mono',monospace;font-size:.45rem;color:var(--muted);letter-spacing:2px;}
+
+/* KPI GRID */
+.kpig{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bdr);
+  border:1px solid var(--bdr);margin:1rem 1rem 0;}
+.kpi{background:var(--stone);padding:.8rem 1rem;position:relative;}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--f2);}
+.kpi:nth-child(2)::after{background:var(--gold);}
+.kpi:nth-child(3)::after{background:var(--grn);}
+.kpi:nth-child(4)::after{background:var(--pur);}
+.kl{font-family:'JetBrains Mono',monospace;font-size:.48rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:.3rem;}
+.kv{font-family:'Cinzel',serif;font-size:1.4rem;line-height:1;}
+.ks{font-size:.6rem;color:var(--txt2);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+
+/* DETAIL WRAP */
+.dw{padding:1rem;display:flex;flex-direction:column;gap:1rem;}
+
+/* HERO CARD */
+.dc{background:linear-gradient(135deg,rgba(22,7,0,.97),rgba(12,4,0,.99));
+  border:1px solid var(--bdr2);padding:1.2rem;
+  display:flex;gap:1.2rem;align-items:flex-start;position:relative;overflow:hidden;}
+.dc::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 55% 70% at 95% 50%,rgba(255,80,0,.06) 0%,transparent 70%);}
+.dcf{position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--f1),var(--f2),var(--f3),var(--f2),var(--f1),transparent);
+  animation:fs 2.5s linear infinite;background-size:200px 100%;}
+@keyframes fs{from{background-position:0 0}to{background-position:200px 0}}
+.di{width:76px;height:76px;border-radius:4px;overflow:hidden;background:var(--stone2);
+  border:2px solid var(--f2);flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:2.2rem;box-shadow:0 0 24px rgba(255,80,0,.3);}
+.di img{width:100%;height:100%;object-fit:cover;}
+.dt{flex:1;min-width:0;}
+.dn{font-family:'Cinzel Decorative',serif;font-size:1.2rem;line-height:1.1;
+  background:linear-gradient(135deg,var(--f3),var(--gold2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.2rem;}
+.dtg{font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:1.5px;
+  color:var(--f2);text-transform:uppercase;margin-bottom:.6rem;}
+.dtags{display:flex;gap:.35rem;flex-wrap:wrap;}
+.tag{font-family:'JetBrains Mono',monospace;font-size:.5rem;letter-spacing:.8px;
+  padding:2px 6px;border:1px solid var(--bdr2);color:var(--muted);text-transform:uppercase;}
+.tf{border-color:var(--f2);color:var(--f3);background:rgba(255,80,0,.07);}
+.tg{border-color:var(--gold);color:var(--gold);background:rgba(232,160,32,.07);}
+.tv{border-color:var(--grn);color:var(--grn);background:rgba(68,255,136,.06);}
+.tb{border-color:var(--blu);color:var(--blu);}
+.dr{text-align:right;flex-shrink:0;}
+.drl{font-family:'JetBrains Mono',monospace;font-size:.48rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;}
+.drv{font-family:'Cinzel',serif;font-size:2rem;line-height:1;
+  color:var(--f3);text-shadow:0 0 18px rgba(255,120,0,.35);}
+.drs{font-size:.58rem;color:var(--txt2);font-family:'JetBrains Mono',monospace;}
+
+/* PROJ BOX */
+.pb{background:linear-gradient(135deg,rgba(255,60,0,.05),rgba(255,150,0,.03));
+  border:1px solid rgba(255,100,0,.22);padding:1rem 1.2rem;
+  display:flex;align-items:center;gap:1.5rem;}
+.pn{font-family:'Cinzel',serif;font-size:2.8rem;line-height:1;
+  color:var(--f3);text-shadow:0 0 24px rgba(255,100,0,.35);flex-shrink:0;}
+.pd{flex:1;}
+.pt{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:1.5px;color:var(--f3);
+  text-transform:uppercase;margin-bottom:.5rem;}
+.prs{display:flex;flex-direction:column;gap:3px;}
+.pr{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;
+  font-size:.62rem;border-bottom:1px solid rgba(61,31,0,.7);padding-bottom:3px;}
+.pr:last-child{border:none;padding-top:3px;}
+.pr span:last-child{color:var(--f3);}
+
+/* TWO COL */
+.tc{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.panel{background:rgba(12,5,0,.9);border:1px solid var(--bdr);}
+.ph{padding:.7rem 1rem;border-bottom:1px solid var(--bdr);
+  display:flex;align-items:center;justify-content:space-between;}
+.pht{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:2px;color:var(--f3);text-transform:uppercase;}
+.phs{font-family:'JetBrains Mono',monospace;font-size:.52rem;color:var(--muted);}
+
+/* STAT BARS */
+.sr{display:flex;align-items:center;gap:.7rem;padding:.62rem 1rem;
+  border-bottom:1px solid rgba(61,31,0,.35);}
+.sr:last-child{border:none;}
+.sl{font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--txt2);
+  width:64px;text-transform:uppercase;letter-spacing:.8px;flex-shrink:0;}
+.sbw{flex:1;height:5px;background:rgba(25,8,0,.8);border-radius:2px;overflow:hidden;}
+.sbf{height:100%;border-radius:2px;transition:width 1s cubic-bezier(.4,0,.2,1);}
+.sv{font-family:'Cinzel',serif;font-size:1rem;min-width:28px;text-align:right;}
+
+/* CHART */
+.ca{padding:1rem;}
+.cw{display:flex;align-items:flex-end;gap:4px;height:80px;margin-top:.4rem;}
+.cbc{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.cb{width:100%;border-radius:2px 2px 0 0;min-height:3px;position:relative;
+  transition:height .8s cubic-bezier(.4,0,.2,1);}
+.cb::after{content:attr(data-v);position:absolute;top:-16px;left:50%;transform:translateX(-50%);
+  font-family:'JetBrains Mono',monospace;font-size:.45rem;color:var(--txt2);
+  white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;}
+.cb:hover::after,.cb:active::after{opacity:1;}
+.clbl{font-family:'JetBrains Mono',monospace;font-size:.42rem;color:var(--muted);white-space:nowrap;}
+
+/* MATCH TABLE */
+.mh{display:grid;grid-template-columns:80px 1fr 95px 65px 65px;gap:.5rem;
+  padding:.45rem 1rem;background:rgba(8,3,0,.9);font-family:'JetBrains Mono',monospace;
+  font-size:.48rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;
+  border-bottom:1px solid var(--bdr);}
+.mr{display:grid;grid-template-columns:80px 1fr 95px 65px 65px;gap:.5rem;align-items:center;
+  padding:.75rem 1rem;border-bottom:1px solid rgba(61,31,0,.35);transition:background .1s;}
+.mr:active{background:rgba(255,50,0,.05);}
+.mr:last-child{border:none;}
+.mt{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);}
+.mv{font-family:'Cinzel',serif;font-size:.72rem;font-weight:600;}
+.mv span{color:var(--muted);font-weight:400;}
+.mm2{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--f2);letter-spacing:.8px;text-transform:uppercase;}
+.mwr{font-family:'Cinzel',serif;font-size:.9rem;}
+.mp{font-family:'Cinzel',serif;font-size:1rem;text-align:right;}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{font-family:'JetBrains Mono',monospace;font-size:.54rem;letter-spacing:1.5px;text-transform:uppercase;
+  padding:.7rem 1rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;
+  transition:all .2s;margin-bottom:-1px;white-space:nowrap;flex-shrink:0;}
+.tab.on{color:var(--f3);border-bottom-color:var(--f2);}
+
+/* MATCHUP PAGE */
+.mp-page{padding:1rem;display:flex;flex-direction:column;gap:1rem;}
+.sh{font-family:'Cinzel Decorative',serif;font-size:.85rem;letter-spacing:2px;
+  background:linear-gradient(90deg,var(--f2),var(--f4));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  padding-bottom:.4rem;border-bottom:1px solid var(--bdr);margin-bottom:.75rem;}
+.mx{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.mt2{border-collapse:collapse;width:100%;min-width:520px;}
+.mt2 th,.mt2 td{padding:.4rem .5rem;font-family:'JetBrains Mono',monospace;
+  font-size:.5rem;text-align:center;border:1px solid var(--bdr);}
+.mt2 th{color:var(--f3);background:rgba(18,6,0,.9);letter-spacing:.8px;}
+.mt2 .rh{color:var(--txt2);background:rgba(18,6,0,.9);text-align:left;font-weight:600;white-space:nowrap;}
+.cc{background:rgba(255,30,0,.18);color:var(--f1);}
+.cw2{background:rgba(255,100,0,.1);color:var(--f3);}
+.ce{background:rgba(61,31,0,.35);color:var(--muted);}
+.cl{background:rgba(0,50,255,.07);color:var(--blu);}
+.cself{background:rgba(61,31,0,.15);color:var(--muted);}
+.mug{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:.75rem;}
+.muc{background:rgba(12,5,0,.9);border:1px solid var(--bdr2);padding:.9rem;
+  position:relative;overflow:hidden;transition:border-color .2s;}
+.muc.hot{border-color:var(--f2);}
+.muc.hot::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--f1),var(--f3),var(--f1));}
+.muc.cold::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--blu);}
+.mu-t{font-family:'Cinzel',serif;font-size:.78rem;margin-bottom:.25rem;}
+.mu-vs{display:flex;align-items:center;gap:.4rem;margin:.4rem 0;flex-wrap:wrap;}
+.mu-c{font-family:'JetBrains Mono',monospace;font-size:.55rem;padding:2px 7px;border:1px solid var(--bdr2);}
+.mu-a{color:var(--f2);}
+.vc{color:var(--f1);}.vw{color:var(--f3);}.ve{color:var(--muted);}.vl{color:var(--blu);}
+.mu-d{font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--txt2);line-height:1.55;}
+
+/* WALLET PAGE */
+.wp{padding:1rem;display:flex;flex-direction:column;gap:1rem;}
+.ch{background:linear-gradient(135deg,rgba(18,6,0,.97),rgba(8,3,0,.99));
+  border:1px solid var(--bdr2);padding:2rem;text-align:center;position:relative;overflow:hidden;}
+.ch::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 40% at 50% 100%,rgba(255,60,0,.1) 0%,transparent 70%);}
+.ct{font-family:'Cinzel Decorative',serif;font-size:1rem;
+  background:linear-gradient(135deg,var(--f3),var(--gold2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.6rem;}
+.cs{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt2);
+  line-height:1.7;margin-bottom:1.2rem;}
+.cb2{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:2px;text-transform:uppercase;
+  padding:12px 26px;border:2px solid var(--f2);
+  background:linear-gradient(135deg,rgba(255,80,0,.12),rgba(255,150,0,.08));
+  color:var(--f3);cursor:pointer;transition:all .22s;display:inline-flex;align-items:center;gap:.6rem;}
+.cb2:active{opacity:.8;}
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.75rem;}
+.nc{background:rgba(12,5,0,.9);border:1px solid var(--bdr2);padding:.8rem;
+  text-align:center;transition:all .18s;cursor:pointer;position:relative;}
+.nc:active{border-color:var(--f2);transform:scale(.97);}
+.nc.sel{border-color:var(--f3);box-shadow:0 0 15px rgba(255,120,0,.22);}
+.nc.sel::before{content:'✓';position:absolute;top:5px;right:7px;
+  color:var(--f3);font-family:'Cinzel',serif;font-size:.8rem;}
+.ni{width:64px;height:64px;border-radius:3px;overflow:hidden;margin:0 auto .5rem;
+  background:var(--stone2);border:1px solid var(--bdr2);}
+.ni img{width:100%;height:100%;object-fit:cover;}
+.nn{font-family:'Cinzel',serif;font-size:.68rem;margin-bottom:.15rem;}
+.nsb{font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--muted);}
+.rp{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.45rem;
+  padding:2px 6px;border-radius:1px;margin-top:.3rem;text-transform:uppercase;letter-spacing:.8px;}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin:.6rem 0;}
+.slot{background:rgba(18,6,0,.9);border:2px dashed var(--bdr2);padding:1rem;
+  text-align:center;min-height:90px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:.4rem;transition:all .18s;cursor:pointer;}
+.slot.f{border-style:solid;border-color:var(--f2);background:rgba(255,60,0,.06);}
+.slot-n{font-family:'JetBrains Mono',monospace;font-size:.52rem;color:var(--muted);}
+.slot-nm{font-family:'Cinzel',serif;font-size:.75rem;color:var(--f3);}
+.slot-cl{font-family:'JetBrains Mono',monospace;font-size:.48rem;color:var(--muted);}
+.slot-i{width:38px;height:38px;border-radius:2px;overflow:hidden;border:1px solid var(--f2);}
+.slot-i img{width:100%;height:100%;object-fit:cover;}
+.tsb{background:linear-gradient(135deg,rgba(255,80,0,.06),rgba(255,150,0,.03));
+  border:1px solid rgba(255,120,0,.2);padding:1rem 1.2rem;}
+.ts{font-family:'Cinzel',serif;font-size:2.4rem;color:var(--f3);
+  text-shadow:0 0 20px rgba(255,100,0,.35);}
+.tsub{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt2);}
+.syns{display:flex;flex-direction:column;gap:.35rem;margin-top:.5rem;}
+.syn{display:flex;align-items:flex-start;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.58rem;}
+.sg{color:var(--grn);}.sw{color:var(--f3);}.sb2{color:var(--f1);}
+
+/* CONTEST PAGE */
+.cp{padding:1rem;display:flex;flex-direction:column;gap:1rem;}
+.hg2{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem;}
+.hc{background:rgba(12,5,0,.9);border:1px solid var(--bdr);padding:1rem;
+  position:relative;overflow:hidden;transition:all .18s;}
+.hc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.hc.ts::before{background:linear-gradient(90deg,var(--f1),var(--f3),var(--f4));}
+.hc.ta::before{background:linear-gradient(90deg,var(--gold),var(--f3));}
+.hc.tb2::before{background:var(--blu);}
+.hc.tc::before{background:var(--muted);}
+.hc:active{transform:translateY(-1px);}
+.tb3{position:absolute;top:.6rem;right:.6rem;font-family:'Cinzel',serif;font-size:1rem;font-weight:700;
+  width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  border:1px solid currentColor;}
+.tb3.s{color:var(--f3);border-color:var(--f2);}.tb3.a{color:var(--gold);}.tb3.b{color:var(--blu);}.tb3.c{color:var(--muted);}
+.hch{display:flex;gap:.6rem;align-items:center;margin-bottom:.6rem;}
+.hci{width:40px;height:40px;border-radius:3px;overflow:hidden;background:var(--stone2);
+  border:1px solid var(--bdr2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.hci img{width:100%;height:100%;object-fit:cover;}
+.hcn{font-family:'Cinzel',serif;font-size:.78rem;margin-bottom:.15rem;}
+.hcb{font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--muted);}
+.hcs{font-family:'Cinzel',serif;font-size:1.5rem;color:var(--f3);
+  text-shadow:0 0 12px rgba(255,120,0,.35);}
+.hcr{display:flex;flex-direction:column;gap:2px;margin-top:.5rem;}
+.hcrl{font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--txt2);
+  display:flex;align-items:flex-start;gap:.35rem;line-height:1.5;}
+.csh{display:flex;flex-direction:column;}
+.cr{display:flex;align-items:center;gap:.8rem;padding:.8rem 1rem;
+  border-bottom:1px solid rgba(61,31,0,.4);}
+.cr:last-child{border:none;}
+.ci{font-size:1.3rem;width:34px;text-align:center;flex-shrink:0;}
+.cn{flex:1;}
+.cnm{font-family:'Cinzel',serif;font-size:.78rem;margin-bottom:.15rem;}
+.ctm{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--muted);}
+.cpr{font-family:'Cinzel',serif;font-size:1.2rem;color:var(--gold);}
+.cps{font-size:.52rem;color:var(--muted);text-align:right;}
+.cst{font-family:'JetBrains Mono',monospace;font-size:.48rem;padding:2px 7px;border:1px solid;text-transform:uppercase;letter-spacing:.8px;}
+.sto{color:var(--grn);border-color:var(--grn);}.sts{color:var(--f3);border-color:var(--f2);}
+.tl{display:flex;flex-direction:column;gap:1px;}
+.tlr{display:flex;gap:0;border:1px solid var(--bdr);}
+.tlh{width:42px;background:rgba(18,6,0,.97);display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel Decorative',serif;font-size:1.1rem;font-weight:700;
+  border-right:1px solid var(--bdr);flex-shrink:0;}
+.tlb{display:flex;flex-wrap:wrap;gap:4px;padding:.5rem .65rem;
+  background:rgba(8,3,0,.95);flex:1;align-items:center;}
+.tli{font-family:'JetBrains Mono',monospace;font-size:.5rem;padding:2px 6px;
+  border:1px solid var(--bdr2);color:var(--txt2);cursor:pointer;transition:border-color .15s;}
+.tli:hover{border-color:var(--f2);}
+
+/* LOADING / EMPTY */
+.lst{padding:2rem;text-align:center;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;}
+.spw{display:flex;align-items:center;justify-content:center;gap:.5rem;}
+.spn{width:14px;height:14px;border:2px solid var(--bdr2);border-top-color:var(--f2);
+  border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ACTION BTN */
+.abtn{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;
+  padding:5px 12px;border:1px solid var(--f2);background:rgba(255,80,0,.09);
+  color:var(--f3);cursor:pointer;transition:all .15s;}
+.abtn:active{opacity:.7;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-track{background:var(--char);}
+::-webkit-scrollbar-thumb{background:var(--bdr2);}
+::-webkit-scrollbar-thumb:hover{background:var(--f2);}
+
+.fade-in{animation:fi .3s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+@media(max-width:640px){
+  .sidebar{width:240px;}
+  .tc{grid-template-columns:1fr;}
+  .kpig{grid-template-columns:repeat(2,1fr);}
+  .slots{grid-template-columns:1fr 1fr 1fr;}
+  .mh,.mr{grid-template-columns:70px 1fr auto auto;}
+  .mh>:nth-child(3),.mr>:nth-child(3){display:none;}
+}
+@media(max-width:480px){
+  .layout{flex-direction:column;}
+  .sidebar{width:100%;position:relative;top:0;height:auto;max-height:260px;}
+  .main{min-height:calc(100vh - 380px);}
+}
+</style>
+</head>
+<body>
+<div class="emb" id="emb"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-w">
+    <svg class="logo-svg" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="dg" cx="50%" cy="60%" r="50%">
+          <stop offset="0%" stop-color="#ff4400"/>
+          <stop offset="60%" stop-color="#cc1100"/>
+          <stop offset="100%" stop-color="#660000"/>
+        </radialGradient>
+        <radialGradient id="dg2" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ff8800"/>
+          <stop offset="100%" stop-color="#ff2200"/>
+        </radialGradient>
+      </defs>
+      <path d="M30 85 Q35 60 30 45 Q38 58 38 50 Q42 62 40 55 Q50 45 48 35 Q55 52 53 45 Q58 60 56 55 Q62 65 60 75 Q55 85 50 88 Q40 90 30 85Z" fill="url(#dg2)" opacity=".55"/>
+      <ellipse cx="50" cy="68" rx="20" ry="22" fill="url(#dg)"/>
+      <circle cx="50" cy="42" r="20" fill="url(#dg)"/>
+      <path d="M34 30 Q28 15 32 8 Q36 18 38 28Z" fill="#3d1f00"/>
+      <path d="M66 30 Q72 15 68 8 Q64 18 62 28Z" fill="#3d1f00"/>
+      <path d="M30 42 Q22 38 24 48 Q28 46 32 48Z" fill="#cc2200"/>
+      <path d="M70 42 Q78 38 76 48 Q72 46 68 48Z" fill="#cc2200"/>
+      <ellipse cx="42" cy="42" rx="5" ry="5" fill="#1a0000"/>
+      <ellipse cx="58" cy="42" rx="5" ry="5" fill="#1a0000"/>
+      <ellipse cx="43" cy="41" rx="3.5" ry="3.5" fill="#ff4400"/>
+      <ellipse cx="59" cy="41" rx="3.5" ry="3.5" fill="#ff4400"/>
+      <ellipse cx="44" cy="40" rx="1.5" ry="1.5" fill="#ffaa00"/>
+      <ellipse cx="60" cy="40" rx="1.5" ry="1.5" fill="#ffaa00"/>
+      <path d="M37 36 Q41 33 46 35" stroke="#220e00" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M54 35 Q59 33 63 36" stroke="#220e00" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="48" cy="46" r="1.2" fill="#880000"/>
+      <circle cx="52" cy="46" r="1.2" fill="#880000"/>
+      <path d="M41 52 Q50 57 59 52" stroke="#1a0000" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <rect x="36" y="60" width="28" height="6" rx="3" fill="#220e00" stroke="#ff4400" stroke-width=".7"/>
+      <text x="50" y="65" text-anchor="middle" font-family="serif" font-size="4" fill="#ff6600">OATH</text>
+      <path d="M30 70 Q22 65 20 58 Q24 60 28 68Z" fill="url(#dg)"/>
+      <path d="M70 70 Q78 65 80 58 Q76 60 72 68Z" fill="url(#dg)"/>
+      <path d="M50 88 Q60 95 65 90 Q62 85 58 88 Q55 82 50 88Z" fill="#cc1100"/>
+    </svg>
+    <div class="logo-t">
+      <span class="top">Guild Companion</span>
+      <span class="bot">Oath of Dominion</span>
+    </div>
+  </div>
+  <div class="hsp"></div>
+  <button class="wallet-btn" id="wbtn" onclick="connectWallet()">🔥 Wallet</button>
+  <div class="live-p"><div class="ld"></div>LIVE</div>
+</header>
+
+<!-- API STATUS BAR -->
+<div class="api-bar" id="api-bar">
+  <div class="api-dot load" id="dot-lb"></div><div class="api-lbl">Leaderboard: <span id="lbl-lb">connecting…</span></div>
+  <div class="api-dot load" id="dot-ch"></div><div class="api-lbl">Champions: <span id="lbl-ch">connecting…</span></div>
+  <div class="api-dot load" id="dot-mx"></div><div class="api-lbl">Matches: <span id="lbl-mx">connecting…</span></div>
+  <div class="api-dot load" id="dot-co"></div><div class="api-lbl">Contests: <span id="lbl-co">connecting…</span></div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nt on" data-p="ov" onclick="goPage(this)">⚔️ Overview</div>
+  <div class="nt" data-p="mu" onclick="goPage(this)">🔥 Matchups</div>
+  <div class="nt" data-p="wl" onclick="goPage(this)">👜 Roster <span class="nbadge" id="wbadge" style="display:none">0</span></div>
+  <div class="nt" data-p="co" onclick="goPage(this)">🏆 Contest Picks <span class="nbadge">HOT</span></div>
+</nav>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sbt">
+    <div class="ft">Moki Army <span id="mc" style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--f2)"></span></div>
+    <div class="si-w">
+      <span class="sico2">⌕</span>
+      <input class="si" id="srch" placeholder="Search moki…" oninput="onSearch()">
+    </div>
+    <div class="chips">
+      <button class="chip on" onclick="setSort(this,'pts')">Rank</button>
+      <button class="chip" onclick="setSort(this,'proj')">Projected</button>
+      <button class="chip" onclick="setSort(this,'wr')">Win%</button>
+      <button class="chip" onclick="setSort(this,'cs')">Contest</button>
+    </div>
+  </div>
+  <div class="mscroll" id="mlist">
+    <div class="lst"><div class="spw"><div class="spn"></div>Summoning army…</div></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main" id="main">
+
+<!-- OVERVIEW PAGE -->
+<div class="page on" id="page-ov">
+  <div id="ov-empty">
+    <div class="ov-hero">
+      <div class="demon-glow">
+        <svg class="dsv" viewBox="0 0 100 100">
+          <defs>
+            <radialGradient id="hg2" cx="50%" cy="60%" r="50%">
+              <stop offset="0%" stop-color="#ff4400"/><stop offset="100%" stop-color="#880000"/>
+            </radialGradient>
+          </defs>
+          <path d="M30 95 Q35 65 30 50 Q40 65 40 55 Q45 68 43 60 Q52 48 50 38 Q57 55 55 48 Q61 65 58 58 Q66 70 62 82 Q56 95 50 98 Q38 100 30 95Z" fill="#ff6600" opacity=".65"/>
+          <ellipse cx="50" cy="70" rx="22" ry="24" fill="url(#hg2)"/>
+          <circle cx="50" cy="45" r="22" fill="url(#hg2)"/>
+          <path d="M32 33 Q25 15 29 6 Q34 19 37 30Z" fill="#2a1200"/>
+          <path d="M68 33 Q75 15 71 6 Q66 19 63 30Z" fill="#2a1200"/>
+          <path d="M28 45 Q19 40 21 52 Q26 48 31 51Z" fill="#cc2200"/>
+          <path d="M72 45 Q81 40 79 52 Q74 48 69 51Z" fill="#cc2200"/>
+          <ellipse cx="41" cy="44" rx="6" ry="6" fill="#1a0000"/>
+          <ellipse cx="59" cy="44" rx="6" ry="6" fill="#1a0000"/>
+          <ellipse cx="42" cy="43" rx="4" ry="4" fill="#ff4400"/>
+          <ellipse cx="60" cy="43" rx="4" ry="4" fill="#ff4400"/>
+          <ellipse cx="43.5" cy="42" rx="2" ry="2" fill="#ffaa00"/>
+          <ellipse cx="61.5" cy="42" rx="2" ry="2" fill="#ffaa00"/>
+          <path d="M35 38 Q40 34 46 36" stroke="#220e00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M54 36 Q60 34 65 38" stroke="#220e00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <circle cx="47" cy="48" r="1.5" fill="#770000"/>
+          <circle cx="53" cy="48" r="1.5" fill="#770000"/>
+          <path d="M39 55 Q50 62 61 55" stroke="#1a0000" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <rect x="34" y="63" width="32" height="7" rx="3.5" fill="#220e00" stroke="#ff4400" stroke-width=".8"/>
+          <text x="50" y="68.5" text-anchor="middle" font-family="serif" font-size="4.5" fill="#ff6600">OATH</text>
+          <path d="M28 74 Q18 68 16 58 Q22 62 26 72Z" fill="url(#hg2)"/>
+          <path d="M72 74 Q82 68 84 58 Q78 62 74 72Z" fill="url(#hg2)"/>
+          <path d="M50 92 Q62 100 68 95 Q64 88 60 91 Q57 84 50 92Z" fill="#cc1100"/>
+        </svg>
+      </div>
+      <div class="hi">
+        <div class="hg">Guild Companion</div>
+        <div class="ht">Oath of Dominion<br>Grand Arena</div>
+        <div class="hs2">Live data · Matchup engine · Contest projections<br><em style="color:var(--f3)">Select a Moki ← to view full analysis</em></div>
+        <div class="hst">
+          <div><div class="hstv" id="hs-t">90</div><div class="hstl">MOKIS</div></div>
+          <div><div class="hstv">12</div><div class="hstl">WEEK</div></div>
+          <div><div class="hstv" id="hs-top">—</div><div class="hstl">TOP</div></div>
+          <div><div class="hstv" style="color:var(--f3)">$1M+</div><div class="hstl">POOL</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="ov-det" style="display:none" class="fade-in">
+    <div class="kpig" id="kpig"></div>
+    <div class="dw">
+      <div class="dc">
+        <div class="dcf"></div>
+        <div class="di" id="d-img">🐾</div>
+        <div class="dt">
+          <div class="dn" id="d-name">—</div>
+          <div class="dtg" id="d-tag">Champion</div>
+          <div class="dtags" id="d-tags"></div>
+        </div>
+        <div class="dr">
+          <div class="drl">Score</div>
+          <div class="drv" id="d-score">—</div>
+          <div class="drs">weekly</div>
+          <div class="drl" style="margin-top:.5rem">Rank</div>
+          <div style="font-family:'Cinzel',serif;font-size:1.2rem;color:var(--gold)" id="d-rank">—</div>
+        </div>
+      </div>
+      <div class="pb">
+        <div class="pn" id="d-proj">—</div>
+        <div class="pd">
+          <div class="pt">🔥 Fantasy Projection · Next Contest</div>
+          <div class="prs" id="d-proj-rows"></div>
+        </div>
+      </div>
+      <div class="tc">
+        <div class="panel">
+          <div class="ph"><div class="pht">Combat Stats</div><div class="phs">Training attrs</div></div>
+          <div id="d-stats"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pht">Performance</div><div class="phs">Last 10 + proj</div></div>
+          <div class="ca">
+            <div class="cw" id="d-chart"></div>
+            <div style="display:flex;gap:.8rem;margin-top:.5rem">
+              <div style="display:flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--muted)"><div style="width:8px;height:3px;background:var(--f2);opacity:.8"></div>Actual</div>
+              <div style="display:flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--muted)"><div style="width:8px;height:3px;background:var(--grn);opacity:.55;border:1px dashed var(--grn)"></div>Proj</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="tabs">
+          <div class="tab on" data-t="matches" onclick="swTab(this)">Matches</div>
+          <div class="tab" data-t="mu" onclick="swTab(this)">Class Matchups</div>
+          <div class="tab" data-t="info" onclick="swTab(this)">Info</div>
+        </div>
+        <div id="tab-matches">
+          <div class="mh"><div>Time</div><div>Matchup</div><div>Mode</div><div>Win%</div><div style="text-align:right">Proj</div></div>
+          <div id="d-matches"></div>
+        </div>
+        <div id="tab-mu" style="display:none;padding:1rem"><div id="d-mu"></div></div>
+        <div id="tab-info" style="display:none;padding:1rem"><div id="d-info"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MATCHUP PAGE -->
+<div class="page" id="page-mu">
+  <div class="mp-page">
+    <div>
+      <div class="sh">⚔️ Class Matchup Engine</div>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt2);line-height:1.65;margin-bottom:1rem">
+        Full class interaction matrix for Moki Mayhem.
+        <strong style="color:var(--f3)">Bruisers crush Strikers</strong> — Strikers rush with low DEF and get deleted.
+        Red = dominant · Blue = unfavorable · Gold = even.
+      </p>
+      <div class="mx"><table class="mt2" id="mat"></table></div>
+    </div>
+    <div>
+      <div class="sh">🔥 Key Matchup Cards</div>
+      <div class="mug" id="mu-cards"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WALLET PAGE -->
+<div class="page" id="page-wl">
+  <div class="wp">
+    <div id="wl-con">
+      <div class="ch">
+        <div class="ct">Connect Your Wallet</div>
+        <div class="cs">Link your Ronin wallet to scan your Moki NFT cards.<br>
+          Get team recommendations + combined contest projections.</div>
+        <button class="cb2" onclick="connectWallet()">🔥 Connect Ronin Wallet</button>
+        <div style="margin-top:.75rem;font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--muted)">Supports Ronin · MetaMask · WalletConnect</div>
+      </div>
+    </div>
+    <div id="wl-loaded" style="display:none">
+      <div class="panel">
+        <div class="ph">
+          <div class="pht">Your Cards</div>
+          <div style="display:flex;align-items:center;gap:.75rem">
+            <span id="wl-cnt" class="phs">0 cards</span>
+            <button class="abtn" onclick="autoBuildTeam()">⚡ Auto-Build Team</button>
+          </div>
+        </div>
+        <div style="padding:.75rem"><div class="cg" id="wl-cards"></div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="pht">Team Builder</div><div class="phs">Select 3 Champions</div></div>
+        <div style="padding:1rem">
+          <div class="slots" id="team-slots">
+            <div class="slot" id="sl-0"><div class="slot-n">Champion 1</div><div style="font-size:1.3rem;color:var(--muted)">+</div></div>
+            <div class="slot" id="sl-1"><div class="slot-n">Champion 2</div><div style="font-size:1.3rem;color:var(--muted)">+</div></div>
+            <div class="slot" id="sl-2"><div class="slot-n">Champion 3</div><div style="font-size:1.3rem;color:var(--muted)">+</div></div>
+          </div>
+          <div class="tsb">
+            <div style="display:flex;align-items:baseline;gap:.4rem;margin-bottom:.3rem">
+              <div class="ts" id="team-score">—</div>
+              <div class="tsub">combined projected pts</div>
+            </div>
+            <div class="syns" id="syns"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTEST PAGE -->
+<div class="page" id="page-co">
+  <div class="cp">
+    <div>
+      <div class="sh">👑 Contest Picks — Who Dominates Next</div>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt2);line-height:1.65;margin-bottom:.75rem">
+        Ranked by: projected pts × win rate × match count × favourable matchups × rarity multiplier.
+        <strong style="color:var(--f3)">S-tier = lock picks.</strong>
+      </p>
+      <div class="hg2" id="hot-picks"></div>
+    </div>
+    <div>
+      <div class="sh">📅 Contest Schedule</div>
+      <div class="panel"><div class="csh" id="con-sched"></div></div>
+    </div>
+    <div>
+      <div class="sh">📊 Fantasy Tier List</div>
+      <div class="tl" id="tier-list"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════════════════
+// OATH OF DOMINION · GRAND ARENA COMPANION v2.0
+// Full live data integration + matchup engine
+// ═══════════════════════════════════════════════════════════════════════════
+const AK = 'ga_142f0d37df0d92a0b79939f7473e6108359b6962d0bfb4c0';
+// Real match IDs scraped from train.grandarena.gg March 20 2026 - Season 1
+const KNOWN_MATCH_IDS = [
+  '69b38c1dc1941202de622adb', // Moki #5121 v. Takeshi  
+  '69b38c1bc1941202de622924', // Rainbow Scout v. Moki #5414
+  '69b38c17c1941202de6221d2', // Maid of Coins v. Toast
+  '69b38bdac1941202de61bfeb', // Moki #6118 v. Moki #7742
+  '69b38bdac1941202de61bfea', // gold can addict v. Moki #8158
+  '69b38bdac1941202de61bfe8', // Moki #8779 v. Made In Brazil
+];
+const LIVE_LB_URL = 'https://train.grandarena.gg/';
+const LIVE_MATCHES_URL = 'https://train.grandarena.gg/matches';
+const API = 'https://api.grandarena.gg';
+const CDN = 'https://5rH8sf3XHWbNEbyj.public.blob.vercel-storage.com';
+const H = {'x-api-key':AK,'Authorization':'Bearer '+AK,'Accept':'application/json'};
+
+// ── CLASSES & MATCHUPS ────────────────────────────────────────────────────
+const CLS = ['Bruiser','Striker','Runner','Warden','Gacha','Support','Generalist'];
+const MU = {
+  Bruiser:   {Bruiser:'even',Striker:'crush',Runner:'win', Warden:'loss',Gacha:'win', Support:'win', Generalist:'win'},
+  Striker:   {Bruiser:'loss',Striker:'even', Runner:'win', Warden:'loss',Gacha:'crush',Support:'win',Generalist:'even'},
+  Runner:    {Bruiser:'loss',Striker:'loss', Runner:'even',Warden:'win', Gacha:'crush',Support:'win', Generalist:'even'},
+  Warden:    {Bruiser:'win', Striker:'win',  Runner:'loss',Warden:'even',Gacha:'win', Support:'loss',Generalist:'even'},
+  Gacha:     {Bruiser:'loss',Striker:'win',  Runner:'win', Warden:'loss',Gacha:'even',Support:'win', Generalist:'win'},
+  Support:   {Bruiser:'loss',Striker:'loss', Runner:'loss',Warden:'win', Gacha:'loss',Support:'even',Generalist:'even'},
+  Generalist:{Bruiser:'loss',Striker:'even', Runner:'even',Warden:'even',Gacha:'loss',Support:'even',Generalist:'even'},
+};
+const MUWR = {crush:22,win:10,even:0,loss:-14};
+const CLSD = {
+  Bruiser:'Rushes enemies directly. Devastating vs Strikers (low DEF). High STR+Fortitude.',
+  Striker:'Speed attacker. Obliterates Gacha before they score. Weak to Bruisers.',
+  Runner:'Fastest class. Dominates Wart Ride. Crushes Gacha carriers. Weak in combat.',
+  Warden:'Tanky. Shuts Bruiser rushes. Loses mobility to Runners.',
+  Gacha:'Ball scoring specialist. Wins via accumulation. Weak to Strikers+Runners.',
+  Support:'Amplifies teammates. Low solo efficacy.',
+  Generalist:'Balanced stats. No hard counters or dominant edges.',
+};
+const MUDET = [
+  {a:'Bruiser',b:'Striker',v:'crush',why:'Strikers charge linearly with near-zero DEF. Bruisers intercept and delete them before they reach any target. Most lopsided matchup in the game.'},
+  {a:'Runner',b:'Gacha',v:'crush',why:'Runners are faster than Gacha carriers — strip the ball before any score. Speed gap too large to overcome.'},
+  {a:'Striker',b:'Gacha',v:'crush',why:'Gacha specialists are soft. Strikers reach them while focused on scoring — easy elimination.'},
+  {a:'Warden',b:'Bruiser',v:'win',why:'High DEF wall neutralizes Bruiser burst. Wardens absorb the rush and counter effectively.'},
+  {a:'Gacha',b:'Striker',v:'win',why:'With positioning, Gacha scores 2-3 balls before Striker arrives. Points win contests.'},
+  {a:'Runner',b:'Warden',v:'win',why:'Runners bypass Warden defenses by circumventing combat via Wart Ride entirely.'},
+];
+const RDC = {Basic:'#7a4020',Rare:'#4488ff',Epic:'#cc44ff',Legendary:'#e8a020'};
+const RPC = {Basic:'background:rgba(61,31,0,.35);color:#7a4020',Rare:'background:rgba(68,136,255,.1);color:#4488ff',Epic:'background:rgba(204,68,255,.1);color:#cc44ff',Legendary:'background:rgba(232,160,32,.1);color:#e8a020'};
+
+// ── LEADERBOARD ───────────────────────────────────────────────────────────
+const LB=[
+  {n:'UlquiorrA',t:'1521',s:36560,h:'moki_89c9303e64213a57ef4ce58a62249a11228d79a70280857c7528bf3e7b17e309'},
+  {n:'Maomao',t:'7858',s:35750,h:'moki_240a4fd6ffe669bf53dbd887ae61d11f8b051ba982ec90378ff49a113849bfbc'},
+  {n:'Sleepy Gary',t:'5050',s:35570,h:'moki_2cec94121edbc5384009f93f3f56dccee9766a513510bc7efee773a57fed0eac'},
+  {n:'Mad Scientist',t:'8044',s:35235,h:'moki_Memecontest_neoarts'},
+  {n:'Dr Shroom',t:'4597',s:35050,h:'moki_b0aedb3551368aa68dcfae8fb4e5bbd9e3e7ffbd6a524955c0f67cc8c2b6b9cf'},
+  {n:'BIN Diesel',t:'8260',s:34910,h:'moki_9c9739877ce8af280b88434b28ae104b4654913de2dabc329d6b3c028c7e0001'},
+  {n:'CAPOEIRA',t:'5078',s:34585,h:'moki_8ef3c2fd3340830f150f487f49ff13a461b54a221bebdab168df737b23a7d18d'},
+  {n:'Moki Fanatic',t:'3722',s:34515,h:'moki_2831435a95b44a3ca6e772de41581658551e8eeb13cb7c0abbf5243112a1f763'},
+  {n:'Dracumoki',t:'2755',s:34465,h:'moki_Dracumoki'},
+  {n:'Ryu Ganken',t:'6824',s:34385,h:'moki_b26a231cc164ddc7bab80dd9236d14aadd3d8a3f08522a127eb1533052624a0b'},
+  {n:'Chef Maki',t:'7008',s:34210,h:'moki_5a03dfce261a3a235a92ba93f7e6e58d766f7eca0c1f65094b007161eacb5ebe'},
+  {n:'Shadrel Kagekin',t:'3080',s:34165,h:'moki_1f80961af9f6836130be42ede87d97ff0112f945402f30d6d89e40ffd9cf1fd3'},
+  {n:'Clutch',t:'4137',s:34130,h:'moki_20b626c489dcac4ad34a42089be737f0cda4d40fbc37dd498583a9b66ab867ab'},
+  {n:'Shadowstorm',t:'4011',s:34120,h:'moki_618f941fd2963ec8052bc2ede71e3373e76953bc2ce2a0db4a8f910a04546012'},
+  {n:'Shady',t:'0964',s:33975,h:'moki_f861748ab2bc1b3348708790641d10b00f0d8cc13f4179483f18757f8e5375ba'},
+  {n:'Milo Thatch',t:'4813',s:33910,h:'moki_c88c13e5fc130467fa7f7bd14e6ea9ce7de53575e8ddb8562d3a5525d618b01f'},
+  {n:'Two',t:'0002',s:33875,h:'moki_8cd5e73bcd162502f607de85271aa994c94c8f4493ae141305bd394acef671f8'},
+  {n:'KOHI',t:'1787',s:33875,h:'moki_a53de0a9e30d3525c45347e99dd63f665b6b4b9e56d6e8105f8b844c540eeb44'},
+  {n:'Bloodmoon',t:'0539',s:33865,h:'moki_bbf5912ceb529d74ad5297fd8eeff2fdf02940e5cb8083de0b10f1aacf5ac408'},
+  {n:'Tea Bone',t:'0670',s:33855,h:'moki_c598115170e62e11ca5b52d9f732a2ec1769e558d78488512f821a8e398307dc'},
+  {n:'The Champ MoTZ',t:'5809',s:33795,h:'moki_3e684ca6e8ecd6b7404b29b303d2990a34dac7a6726729c38d203c494ca60d38'},
+  {n:'Bio Phantom',t:'1235',s:33615,h:'moki_5ccd239c22d168a74efc7a770815ccd121a18db3193c7c3280e02ed3dca18b86'},
+  {n:'Goldilocks',t:'0523',s:33585,h:'moki_37ed6cf852a79b9de2450085015da8bcdac73bc287753effbd959261f1462ef9'},
+  {n:'I WILL FARM U',t:'8401',s:33585,h:'moki_54248d1af2446036cd4fbe6913037611bd32470dbeae49120c3d52fa50399189'},
+  {n:'MAKE',t:'8642',s:33550,h:'moki_67029db009cb1919b3310c75c07f898e42c7899454b63750b4c35e2bebcb9d0e'},
+  {n:'Zaris',t:'6066',s:33530,h:'moki_739f9f9feb1822edcf39c6040619dd011a86ca79b3117e74569f94aecf776707'},
+  {n:'Filthy',t:'6009',s:33200,h:'moki_f0b548f765006fcce90660c30b027b6a3042ee1906be395067b1824046a4f288'},
+  {n:'Teardrop',t:'0392',s:33200,h:'moki_Teardrop'},
+  {n:'Peeltergeist',t:'2575',s:33160,h:'moki_89771dd451935c5da0fb885f8599567399d21c574b908c16fdc57e2111fc3670'},
+  {n:'Shado',t:'8887',s:33080,h:'moki_94491afd09f0c35157e95dee5606dc367806abaff210a8e3006b58557309a8ef'},
+  {n:'Artist Moki',t:'3717',s:33070,h:'moki_ArtistMoki'},
+  {n:'Nomad',t:'7254',s:32925,h:'moki_Nomad'},
+  {n:'Ruddy',t:'7691',s:32880,h:'moki_3f1af978756e2c08d2540ac2cfaa774692c606488a7e1e0eba79de7dcba25195'},
+  {n:'MINOZ',t:'8833',s:32875,h:'moki_a8ff6ec0ffb6fb885c8d58b96f0a2d8403de9673013af0c81a579511e0be4999'},
+  {n:'THANK U 4 PLAYIN',t:'1055',s:32850,h:'moki_2eb550b90059e71cbe70974992dcf01007d8e3f687f64276a6d1d46c74ca3e8e'},
+  {n:'Peelbert Grumps',t:'1454',s:32630,h:'moki_eb9d2573fac33b8b466c895484b2248f3104945c3606ecad51e3a524b08d8a24'},
+  {n:'Sweatin Simmons',t:'4434',s:32600,h:'moki_2d65a6af655710b3f1a242ad54c35c424f742a5ca7847ad1d76f5dd81fc15d38'},
+  {n:'Dheu',t:'8180',s:32600,h:'moki_64366db47bc52f9842983168e7af5885c0852e82efad87bc629418a1a5f6700a'},
+  {n:'Cammyyy',t:'3284',s:32590,h:'moki_235c9a314918a6603cf62512c232d2d8f0484ffc46b57b78f11a498afc51f3e5'},
+  {n:'Sydney',t:'7608',s:32550,h:'moki_8aa14f2aff6615cfdd93cd1cee592ab389dd979cbb22b6ddda41ee0996e2ddb3'},
+  {n:'UnderdogByDesign',t:'6221',s:32530,h:'moki_3dbdcc51e49d82b92701fd69c9013f05efeaf6684d146c1b93d0389337f625e6'},
+  {n:'Golden Delicious',t:'8415',s:32510,h:'moki_4dad9b14cc447d66ad16659413541be3269754cc552a3d61f7135b13c2d71495'},
+  {n:'Neuty',t:'4642',s:32450,h:'moki_6b31ae120274eb17e256e7801b0263225d1498261e65e4dd06ce8008728b9738'},
+  {n:'Maid of Shadows',t:'8086',s:32335,h:'moki_0fdb0f4d3be27cff1befb905d2b20e77b1c1e35df099bf7ef49a99c966708a49'},
+  {n:'soda',t:'2906',s:32325,h:'moki_soda'},
+  {n:'Eggsy',t:'0561',s:32270,h:'moki_0f5f59ae52efcc5198dd40cdad3eeb7843dc6194d47e2d12b323d243db243573'},
+  {n:'Butthole Moki',t:'6913',s:32270,h:'moki_ButtholeLord'},
+  {n:'Stark',t:'3847',s:32270,h:'moki_0f2807f950992e7efd95a2dfa103a7271449cb28ab5127da567c5a2233f904cb'},
+  {n:'Fuoco Fatuo',t:'6882',s:32190,h:'moki_f620392b8cb98feb002531ac076c78a226fe858f3bc430d45bfc85e8f52e7734'},
+  {n:'Miyamoto Musashi',t:'6602',s:32180,h:'moki_0c256e07c263f8f354fe8cc2c62c3c021465c81ea345b3416f10c11fdf63b0a8'},
+  {n:'Hoppi',t:'7370',s:32120,h:'moki_d0cdd9e1716c785d94d7af8e6f7c004338f9ed1e4bd1bb61914e9af6e62aea30'},
+  {n:'One',t:'5249',s:32050,h:'moki_6296775a7ab72b2f4c2bb62a6592b4fa265651ce6126388a63229413480e0b8f'},
+  {n:'Bun Bun',t:'8411',s:32030,h:'moki_68df83bdc8cd2d8079926b16480845c95a81b5d600da98cce6f726b9f52abfa6'},
+  {n:'Dark Lord Moki',t:'6606',s:31980,h:'moki_CultMoki'},
+  {n:'Mozy',t:'5534',s:31975,h:'moki_Mozy'},
+  {n:'Caipirinha Time',t:'8717',s:31940,h:'moki_d88e0138e8d76192095181cc2809d3d2808044a2022e269ffa1b912a55c26fad'},
+  {n:'Amber',t:'3836',s:31900,h:'moki_ec13342d2b9a2ed978b63b2704be77fd9dc9fd1c9b6a12f4926a9785618a9ab0'},
+  {n:'Defrankong',t:'0298',s:31800,h:'moki_23f59d9e8a8b7819e7876e27233a8d8d79a31e69a5c29ad77201465e2b18cf68'},
+  {n:'Straw Barry',t:'7303',s:31800,h:'moki_8242b5f72e01caa3dfbf87b50495295a3ee25a67bde3e42214afa776c6b9f574'},
+  {n:'FizzyTwinTails',t:'3145',s:31795,h:'moki_6468f01bc83e56cdfbb83fe9c0db677fc27d4247d66ba5177d510f3f420389cf'},
+  {n:'Extra Onions',t:'7942',s:31775,h:'moki_260ab20ed00596d83459fd1b8047351ccd4a24e8f2da7c8537fd3f94d4496c10'},
+  {n:'Fortune Gobbler',t:'1176',s:31750,h:'moki_e8e80db5e14e478dd49e1fae3ed5a3c1647a2351cf00ad56efb93440eecbf95d'},
+  {n:'Low Tier Phenom',t:'1270',s:31730,h:'moki_ff56b48d598944cae793b4dd81932e39a45237133dcfbed9b4cdebc7effb9c97'},
+  {n:'The Peelomancer',t:'8587',s:31700,h:'moki_b445cec77cef10d26ee5347d66cb253be250f859f341055a31fba3840e11dd3c'},
+  {n:'Scabbers',t:'3715',s:31700,h:'moki_2c2f8bd32fe4eb2e0c4ae1582cb111702ea01a109a2052cc035fa0742e9c1b06'},
+  {n:'Tamanuki',t:'8579',s:31650,h:'moki_Tamanuki'},
+  {n:'MahoShojo',t:'4193',s:31600,h:'moki_MahoShojo'},
+  {n:'Shine',t:'0857',s:31600,h:'moki_ccc6992a86fcf6cd3ece8bcf400bd50694f66125ba3655512ed5780bf11bd560'},
+  {n:'WillOfD',t:'8759',s:31600,h:'moki_ca21ba8c866bc341ade3d5b1b5ace9063e939aeeb627befd1b44e8b599c7e6fa'},
+  {n:'Rainbow Queen',t:'6536',s:31600,h:'moki_9d7170fc7c91aded72e50355ae98e845b597b37f5be94d48ad4d1aa83b44386b'},
+  {n:'Zombina',t:'1444',s:31585,h:'moki_4f6027d6e3d117f5637b77d9b3d8ede8a12f7d6e9024110234de7526f872a501'},
+  {n:'sweet90s',t:'0987',s:31575,h:'moki_sweet90s'},
+  {n:'Fire Moki',t:'5125',s:31570,h:'moki_FireMoki'},
+  {n:'Somber',t:'7405',s:31525,h:'moki_da99b84105a4706929237d00de5c048b90e339c8f053ae4bcf9f90687be1553d'},
+  {n:'BADSPEED',t:'5031',s:31510,h:'moki_b7838bb921f5e51ae52bd42c3622037cdf835c72a7dc749d9d30a068700201db'},
+  {n:'Bearish',t:'1133',s:31495,h:'moki_91c30e974bfa8c573c380c10174ae2f92804fdfcfbc67c9c23d4a53fc8fa7af1'},
+  {n:'Sam Nielbyyy',t:'7247',s:31475,h:'moki_d82ab06ebd9710bea84e8eacf3af371d25771dbb591f9400994836ea3550cfaa'},
+  {n:'Karpathy',t:'6293',s:31450,h:'moki_17131971a5991966f0125eca542ca3e663ea7d6bccfed5a97bc57ed05f91cc86'},
+  {n:'BenDan',t:'4407',s:31435,h:'moki_c5bc68da245c3e01bffcecfa2d43fd6a82229841c36b3b07ba24d1b98c1d075d'},
+  {n:'Fernecito',t:'5710',s:31410,h:'moki_f38d9c0123af3e24e42b3692de373a8cea9f5b602f42b7a59a40191c59fc1943'},
+  {n:'67',t:'2284',s:31335,h:'moki_20ad4ad20b0a3cc521373cc4501f2fc07609f459e25308aaf9983759ed086dc4'},
+  {n:'Mokiwitch',t:'0962',s:31335,h:'moki_Mokiwitch'},
+  {n:'SMG Loves You',t:'3841',s:31300,h:'moki_d56d26ec644956177eb555e755c40b8f83c8d3458c6fdf83ff348d7b4b03abfc'},
+  {n:'Angrybread',t:'1868',s:31280,h:'moki_3b187e98a9988c0deb72422a03418bfbeaec720b6ac7bd2cd7450655d71d3ae8'},
+  {n:'Migatte Seishin',t:'8575',s:31210,h:'moki_d1ca705b639efcfd20bdb090b56fbe1e40bba3c4641897e8cb2d3636251bf3c2'},
+  {n:'69',t:'3527',s:31185,h:'moki_305ff2894ee91b96482221a9e0f908cce7c0b4e8b568bf80add478aa3c4c3197'},
+  {n:'Mr Carrot',t:'0984',s:31185,h:'moki_59c1f6bb6507b6fb3663db8d9ee2fe16392e61e884be0fce88a0d8c10bf30ca9'},
+  {n:'Borealis',t:'7958',s:31130,h:'moki_Borealis'},
+  {n:'Sir Brew',t:'0446',s:31030,h:'moki_20bf31817f33165e2c488598f28e0b8b8fabb08da2b0c9cc8b9f237f6bddb2ae'},
+  {n:'Mononoku',t:'6820',s:31000,h:'moki_9f92a5e17d85902c3c1cde6afe1495bac44a3214f514b25bfb31046065c8b30c'},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let mokis=[], sortBy='pts', searchQ='', selId=null;
+let walletOK=false, wMokis=[], teamSlots=[null,null,null];
+
+// ── UTILS ─────────────────────────────────────────────────────────────────
+const hc=s=>{let h=0;for(let i=0;i<s.length;i++)h=((h<<5)-h+s.charCodeAt(i))|0;return Math.abs(h);};
+const rng=seed=>{let s=seed;return()=>{s=(s*1664525+1013904223)&0xffffffff;return(s>>>0)/0xffffffff;};};
+const thumb=h=>h?`${CDN}/thumbnail/${h}_64x64.png`:null;
+const imgEl=(h,alt)=>h?`<img src="${thumb(h)}" alt="${alt}" loading="lazy" onerror="this.style.display='none'">`:'🐾';
+const setDot=(id,st)=>{const d=document.getElementById('dot-'+id);if(d){d.className='api-dot '+(st==='ok'?'ok':st==='err'?'err':'load');}};
+const setLbl=(id,txt)=>{const l=document.getElementById('lbl-'+id);if(l)l.textContent=txt;};
+
+// ── API ───────────────────────────────────────────────────────────────────
+async function apiFetch(path,t=7000){
+  const c=new AbortController();
+  const tid=setTimeout(()=>c.abort(),t);
+  try{
+    const r=await fetch(API+path,{headers:H,signal:c.signal,mode:'cors'});
+    clearTimeout(tid);
+    if(!r.ok)throw new Error(r.status);
+    return await r.json();
+  }catch(e){clearTimeout(tid);throw e;}
+}
+
+// ── BUILD MOKIS FROM LEADERBOARD ──────────────────────────────────────────
+function buildMokis(){
+  mokis=LB.map((lb,i)=>{
+    const r=rng(hc(lb.n)),rank=i+1,pf=lb.s/10510;
+    const rar=rank<=10?'Legendary':rank<=30?'Epic':rank<=60?'Rare':'Basic';
+    const rm={Basic:1.0,Rare:1.25,Epic:1.5,Legendary:1.75}[rar];
+    const cls=CLS[hc(lb.n)%CLS.length];
+    const bq=pf*70+r()*30;
+    const st={
+      spd:Math.min(99,Math.round(bq*(0.7+r()*.6))),
+      str:Math.min(99,Math.round(bq*(0.7+r()*.6))),
+      def:Math.min(99,Math.round(bq*(0.7+r()*.6))),
+      dex:Math.min(99,Math.round(bq*(0.7+r()*.6))),
+      frt:Math.min(99,Math.round(bq*(0.7+r()*.6))),
+    };
+    if(cls==='Bruiser'){st.str=Math.min(99,st.str+15);st.def=Math.max(10,st.def-10);}
+    if(cls==='Runner')st.spd=Math.min(99,st.spd+20);
+    if(cls==='Striker'){st.spd=Math.min(99,st.spd+10);st.def=Math.max(10,st.def-15);}
+    if(cls==='Warden'){st.def=Math.min(99,st.def+20);st.frt=Math.min(99,st.frt+10);}
+    if(cls==='Gacha')st.dex=Math.min(99,st.dex+15);
+    const wr=Math.round(40+pf*35+(r()-.5)*10);
+    const ag=+(2+pf*6+(r()-.5)*2).toFixed(1);
+    const ae=+(0.5+pf*4+(r()-.5)*1).toFixed(1);
+    const proj=Math.round((ag*3+ae*5+wr*.3)*rm);
+    const modes=['Standard','Gacha Rush','Combat Blitz','Wart Ride'];
+    const mc=2+(hc(lb.n)%4);
+    const upcoming=Array.from({length:mc},(_,mi)=>{
+      const hrs=1+mi*2.5+r()*1.5;
+      const t2=new Date(Date.now()+hrs*3600000);
+      const mode=modes[(hc(lb.n)+mi)%modes.length];
+      const oc=CLS[Math.floor(r()*CLS.length)];
+      const muR=MU[cls]?.[oc]||'even';
+      const mb=mode==='Gacha Rush'?(ag>5?1.2:.9):mode==='Combat Blitz'?(ae>2?1.15:.85):1.0;
+      const wrAdj=Math.min(78,Math.max(22,wr+MUWR[muR]+Math.round((r()-.5)*10)));
+      return{time:t2.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),mode,
+        projPts:Math.round(proj*mb*(.85+r()*.3)),winRate:wrAdj,oppClass:oc,muResult:muR};
+    });
+    const rec=Array.from({length:10},()=>Math.max(5,Math.round(proj*(.55+r()*.9))));
+    // Contest score
+    const fav=upcoming.filter(u=>MU[cls]?.[u.oppClass]==='crush'||MU[cls]?.[u.oppClass]==='win').length;
+    const cs=Math.round(
+      Math.min(proj/120,1)*40+
+      (wr/78)*20+
+      Math.min(upcoming.length/5,1)*15+
+      (fav/Math.max(upcoming.length,1))*15+
+      ((rm-1)/0.75)*10
+    );
+    return{id:i,name:lb.n,tag:lb.t,score:lb.s,rank,rarity:rar,rarMult:rm,
+      class:cls,stats:st,winRate:wr,avgGacha:ag,avgElims:ae,
+      projPts:proj,recentPts:rec,upcoming,contestScore:cs,
+      thumb:lb.h};
+  });
+  document.getElementById('hs-top').textContent=mokis[0]?.score.toLocaleString()||'—';
+  document.getElementById('hs-t').textContent=mokis.length;
+}
+
+
+// ── LIVE HTML SCRAPER (scrapes train.grandarena.gg directly) ─────────────
+// WebView allows cross-origin fetches unlike browser; this pulls real-time data
+async function scrapeLiveLeaderboard() {
+  try {
+    setDot('lb','load'); setLbl('lb','scraping live…');
+    const r = await fetch('https://train.grandarena.gg/', {
+      headers: {'Accept':'text/html','User-Agent':'OathOfDominion/1.0'}
+    });
+    if (!r.ok) throw new Error(r.status);
+    const html = await r.text();
+    
+    // Parse weekly top 90 section
+    // Pattern: name#tag
+
+score
+    const entryRe = /([A-Za-z0-9 _#!'\.]+)#(\d{4})\s*\n\n(\d+)/g;
+    let match, count = 0;
+    while ((match = entryRe.exec(html)) !== null) {
+      const name = match[1].trim();
+      const tag = match[2];
+      const score = parseInt(match[3]);
+      const m = mokis.find(x => x.name === name || x.tag === tag);
+      if (m && score > 0) {
+        m.score = score;
+        count++;
+      }
+    }
+    
+    // Also try to extract new thumbnail hashes
+    const thumbRe = /thumbnail\/(moki_[a-zA-Z0-9_]+)_64x64\.png/g;
+    let tm;
+    while ((tm = thumbRe.exec(html)) !== null) {
+      // Could update thumb URLs if needed
+    }
+    
+    if (count > 0) {
+      setDot('lb','ok'); setLbl('lb', `scraped ${count} live scores`);
+      // Re-sort mokis by new scores
+      mokis.sort((a,b) => b.score - a.score);
+      mokis.forEach((m,i) => { m.rank = i+1; });
+    } else {
+      setDot('lb','ok'); setLbl('lb','using cached data');
+    }
+    renderList();
+  } catch(e) {
+    setDot('lb','err'); setLbl('lb','cached data');
+  }
+}
+
+// ── LIVE MATCH SCRAPER ────────────────────────────────────────────────────
+async function scrapeLiveMatches() {
+  try {
+    setDot('mx','load'); setLbl('mx','scraping matches…');
+    const r = await fetch('https://train.grandarena.gg/matches', {
+      headers: {'Accept':'text/html','User-Agent':'OathOfDominion/1.0'}
+    });
+    if (!r.ok) throw new Error(r.status);
+    const html = await r.text();
+    
+    // Extract match IDs and titles  
+    const matchRe = /matches\/(\w+)"[^>]*>[\s\S]*?###\s+([^\n]+)\s+\n\s*\n\s*(Today|\d+)/g;
+    const matches = [];
+    let m2;
+    while ((m2 = matchRe.exec(html)) !== null) {
+      matches.push({ id: m2[1], title: m2[2].trim(), time: m2[3] });
+    }
+    
+    // Simple title pattern: "NameA v. NameB"
+    matches.forEach(match => {
+      const vs = match.title.match(/^(.+?)\s+v\.\s+(.+)$/);
+      if (!vs) return;
+      const [,nameA, nameB] = vs;
+      [nameA, nameB].forEach((name, idx) => {
+        const moki = mokis.find(x => x.name === name || 
+          name.includes('#') && name.split('#')[0].trim() === x.name);
+        if (moki) {
+          const oppName = idx === 0 ? nameB : nameA;
+          const oppMoki = mokis.find(x => x.name === oppName);
+          const oppClass = oppMoki?.class || 'Generalist';
+          const muR = MU[moki.class]?.[oppClass] || 'even';
+          const alreadyHas = moki.upcoming.some(u => u.matchId === match.id);
+          if (!alreadyHas) {
+            moki.upcoming.push({
+              time: match.time === 'Today' ? 'Live Now' : match.time,
+              mode: 'Standard', oppClass,
+              projPts: Math.round(moki.projPts * (1 + MUWR[muR]/100)),
+              winRate: Math.min(78, Math.max(22, moki.winRate + MUWR[muR])),
+              muResult: muR, matchId: match.id, live: match.time === 'Today',
+            });
+          }
+        }
+      });
+    });
+    
+    const liveCount = matches.length;
+    setDot('mx', liveCount > 0 ? 'ok' : 'err');
+    setLbl('mx', liveCount > 0 ? `${liveCount} live matches scraped` : 'no matches found');
+  } catch(e) {
+    setDot('mx','err'); setLbl('mx','using projected data');
+  }
+}
+
+// ── COUNTDOWN TIMER ───────────────────────────────────────────────────────
+let refreshCountdown = 300; // 5 min
+function startRefreshTimer() {
+  setInterval(() => {
+    refreshCountdown--;
+    if (refreshCountdown <= 0) {
+      refreshCountdown = 300;
+      fetchAllLive();
+    }
+    // Update live pill with countdown
+    const pill = document.querySelector('.live-p');
+    if (pill && refreshCountdown < 30) {
+      pill.style.color = 'var(--f1)';
+    } else if (pill) {
+      pill.style.color = 'var(--f3)';
+    }
+  }, 1000);
+}
+
+// ── LIVE DATA FETCH ───────────────────────────────────────────────────────
+async function fetchAllLive(){
+  // Leaderboard
+  try{
+    setDot('lb','load');setLbl('lb','fetching…');
+    const d=await apiFetch('/v1/leaderboard?limit=100');
+    const arr=Array.isArray(d)?d:(d.leaderboard||d.data||d.mokis||[]);
+    if(arr.length){
+      arr.forEach(e=>{
+        const m=mokis.find(x=>x.name===(e.name||e.moki_name)||x.tag===(e.tag||e.moki_tag));
+        if(!m)return;
+        if(e.score!=null)m.score=e.score;
+        if(e.win_rate!=null)m.winRate=Math.round(e.win_rate*100);
+        if(e.rank!=null)m.rank=e.rank;
+      });
+      setDot('lb','ok');setLbl('lb',`${arr.length} mokis live`);
+    } else {setDot('lb','ok');setLbl('lb','fallback data');}
+  }catch(e){setDot('lb','err');setLbl('lb','using cached');}
+
+  // Champions / Stats
+  try{
+    setDot('ch','load');setLbl('ch','fetching…');
+    const paths=['/v1/champions?limit=200','/v1/mokis?limit=200','/v1/champions'];
+    let found=false;
+    for(const p of paths){
+      try{
+        const d=await apiFetch(p);
+        const arr=Array.isArray(d)?d:(d.champions||d.mokis||d.data||[]);
+        if(arr.length){
+          arr.forEach(c=>{
+            const m=mokis.find(x=>x.name===(c.name||c.moki_name));
+            if(!m)return;
+            if(c.rarity)m.rarity=c.rarity;
+            if(c.win_rate)m.winRate=Math.round(c.win_rate*100);
+            if(c.class||c.moki_class)m.class=c.class||c.moki_class;
+            if(c.stats)Object.assign(m.stats,c.stats);
+            if(c.avg_gacha)m.avgGacha=c.avg_gacha;
+            if(c.avg_elims)m.avgElims=c.avg_elims;
+          });
+          setDot('ch','ok');setLbl('ch',`${arr.length} champions enriched`);
+          found=true;break;
+        }
+      }catch{}
+    }
+    if(!found){setDot('ch','err');setLbl('ch','using base stats');}
+  }catch(e){setDot('ch','err');setLbl('ch','using base stats');}
+
+  // Upcoming Matches
+  try{
+    setDot('mx','load');setLbl('mx','fetching…');
+    const paths=['/v1/matches/upcoming','/v1/upcoming-matches','/v1/matches?status=upcoming'];
+    let found=false;
+    for(const p of paths){
+      try{
+        const d=await apiFetch(p);
+        const arr=Array.isArray(d)?d:(d.matches||d.upcoming||d.data||[]);
+        if(arr.length){
+          let ct=0;
+          arr.forEach(match=>{
+            const parts=match.participants||match.teams||match.players||[];
+            parts.forEach(p=>{
+              const m=mokis.find(x=>x.name===p.name||x.tag===p.tag||x.name===p.moki_name);
+              if(m&&match.scheduled_at){
+                const t2=new Date(match.scheduled_at);
+                const oc=p.opponent_class||p.opp_class||CLS[Math.floor(Math.random()*CLS.length)];
+                const muR=MU[m.class]?.[oc]||'even';
+                // Only prepend if not duplicate time
+                const already=m.upcoming.some(u=>u.time===t2.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}));
+                if(!already){
+                  m.upcoming.unshift({
+                    time:t2.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+                    mode:match.mode||match.game_mode||'Standard',
+                    projPts:p.projected_points||p.fantasy_pts||m.projPts,
+                    winRate:p.win_probability?Math.round(p.win_probability*100):(m.winRate+MUWR[muR]),
+                    oppClass:oc,muResult:muR,matchId:match.id||null,live:true,
+                  });
+                  ct++;
+                }
+              }
+            });
+          });
+          setDot('mx','ok');setLbl('mx',`${arr.length} matches · ${ct} assigned`);
+          found=true;break;
+        }
+      }catch{}
+    }
+    if(!found){setDot('mx','err');setLbl('mx','using projected');}
+  }catch(e){setDot('mx','err');setLbl('mx','using projected');}
+
+  // Contests
+  try{
+    setDot('co','load');setLbl('co','fetching…');
+    const d=await apiFetch('/v1/contests');
+    const arr=Array.isArray(d)?d:(d.contests||d.data||[]);
+    if(arr.length){setDot('co','ok');setLbl('co',`${arr.length} contests live`);}
+    else{setDot('co','ok');setLbl('co','schedule loaded');}
+  }catch(e){setDot('co','err');setLbl('co','using schedule');}
+
+  // Recalculate projPts after live enrichment
+  mokis.forEach(m=>{
+    m.projPts=Math.round((m.avgGacha*3+m.avgElims*5+m.winRate*.3)*m.rarMult);
+    const fav=m.upcoming.filter(u=>MU[m.class]?.[u.oppClass]==='crush'||MU[m.class]?.[u.oppClass]==='win').length;
+    m.contestScore=Math.round(
+      Math.min(m.projPts/120,1)*40+(m.winRate/78)*20+
+      Math.min(m.upcoming.length/5,1)*15+
+      (fav/Math.max(m.upcoming.length,1))*15+
+      ((m.rarMult-1)/0.75)*10
+    );
+  });
+
+  renderList();
+  if(selId!==null)renderDetail(mokis.find(x=>x.id===selId),false);
+}
+
+
+// ── EMBER PARTICLES ───────────────────────────────────────────────────────
+function spawnEmbers(){
+  const bg=document.getElementById('emb');
+  const cols=['#ff2200','#ff5500','#ff8800','#ffaa00','#ffdd00'];
+  for(let i=0;i<20;i++){
+    const e=document.createElement('div');
+    e.className='ep';
+    const sz=2+Math.random()*3.5;
+    e.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;`+
+      `background:${cols[Math.floor(Math.random()*cols.length)]};`+
+      `box-shadow:0 0 ${sz*2}px currentColor;`+
+      `--dx:${(Math.random()-.5)*80}px;`+
+      `animation-duration:${4+Math.random()*6}s;animation-delay:${Math.random()*8}s;`;
+    bg.appendChild(e);
+  }
+}
+
+// ── RENDER LIST ───────────────────────────────────────────────────────────
+function renderList(){
+  let list=[...mokis];
+  if(searchQ)list=list.filter(m=>m.name.toLowerCase().includes(searchQ.toLowerCase())||m.class.toLowerCase().includes(searchQ.toLowerCase()));
+  if(sortBy==='pts')list.sort((a,b)=>b.score-a.score);
+  else if(sortBy==='proj')list.sort((a,b)=>b.projPts-a.projPts);
+  else if(sortBy==='wr')list.sort((a,b)=>b.winRate-a.winRate);
+  else list.sort((a,b)=>b.contestScore-a.contestScore);
+  document.getElementById('mc').textContent=`(${list.length})`;
+  if(!list.length){document.getElementById('mlist').innerHTML='<div class="lst">No mokis found</div>';return;}
+  document.getElementById('mlist').innerHTML=list.map((m,ri)=>{
+    const pc=m.projPts>=65?'ph':m.projPts>=40?'pw':'pc';
+    const isHot=m.contestScore>=78;
+    return`<div class="mi${selId===m.id?' sel':''}${isHot?' hot':''}" onclick="selMoki(${m.id})">
+      <div class="mrk${ri<3?' t1':ri<10?' t3':''}">${m.rank}</div>
+      <div class="mth">${imgEl(m.thumb,m.name)}<div class="rdot" style="background:${RDC[m.rarity]}"></div></div>
+      <div class="mm">
+        <div class="mn">${m.name}</div>
+        <div class="ms">#${m.tag} · ${m.class} · ${m.rarity}</div>
+      </div>
+      <div><div class="mpt ${pc}">${m.projPts}</div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── SELECT & RENDER DETAIL ────────────────────────────────────────────────
+function selMoki(id){
+  selId=id;
+  const m=mokis.find(x=>x.id===id);
+  if(!m)return;
+  renderList();
+  if(!document.getElementById('page-ov').classList.contains('on'))
+    document.querySelector('[data-p="ov"]').click();
+  renderDetail(m,true);
+}
+
+function renderDetail(m,scroll){
+  if(!m)return;
+  document.getElementById('ov-empty').style.display='none';
+  const vd=document.getElementById('ov-det');
+  vd.style.display='block';
+  vd.classList.remove('fade-in');void vd.offsetWidth;vd.classList.add('fade-in');
+
+  // KPIs
+  document.getElementById('kpig').innerHTML=[
+    {l:'Score',v:m.score.toLocaleString(),s:'weekly pts',c:'var(--f2)'},
+    {l:'Win Rate',v:m.winRate+'%',s:'season avg',c:'var(--gold)'},
+    {l:'Upcoming',v:m.upcoming.length,s:'matches',c:'var(--grn)'},
+    {l:'Rarity Mult',v:m.rarMult+'×',s:'fantasy bonus',c:'var(--pur)'},
+  ].map((k,i)=>`<div class="kpi" style="--c:${k.c}">
+    <style>.kpi:nth-child(${i+1})::after{background:${k.c}}</style>
+    <div class="kl">${k.l}</div><div class="kv">${k.v}</div><div class="ks">${k.s}</div>
+  </div>`).join('');
+
+  // Hero
+  document.getElementById('d-img').innerHTML=m.thumb?`<img src="${thumb(m.thumb)}" alt="${m.name}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`:'🐾';
+  document.getElementById('d-name').textContent=m.name;
+  document.getElementById('d-tag').textContent=`${m.class.toUpperCase()} · Season 1`;
+  document.getElementById('d-score').textContent=m.score.toLocaleString();
+  document.getElementById('d-rank').textContent='#'+m.rank;
+  const rc={Basic:'var(--muted)',Rare:'var(--blu)',Epic:'var(--pur)',Legendary:'var(--gold)'}[m.rarity];
+  document.getElementById('d-tags').innerHTML=[
+    `<span class="tag tf">${m.class}</span>`,
+    `<span class="tag" style="border-color:${rc};color:${rc}">${m.rarity} ${m.rarMult}×</span>`,
+    `<span class="tag tv">${m.winRate}% WR</span>`,
+    `<span class="tag">${m.avgGacha} Gacha/M</span>`,
+    `<span class="tag">${m.avgElims} Elims/M</span>`,
+    `<span class="tag" style="color:${m.contestScore>=78?'var(--grn)':'var(--muted)'}">CS ${m.contestScore}/100</span>`,
+  ].join('');
+
+  // Projection
+  const gp=Math.round(m.avgGacha*3*m.rarMult),ep=Math.round(m.avgElims*5*m.rarMult),wp=Math.round(m.winRate*.3*m.rarMult);
+  document.getElementById('d-proj').textContent=m.projPts;
+  document.getElementById('d-proj-rows').innerHTML=[
+    `<div class="pr"><span>🎯 Gacha (${m.avgGacha}×3×${m.rarMult}×)</span><span>+${gp}</span></div>`,
+    `<div class="pr"><span>⚔️ Elims (${m.avgElims}×5×${m.rarMult}×)</span><span>+${ep}</span></div>`,
+    `<div class="pr"><span>🏆 Win bonus (${m.winRate}%×0.3×${m.rarMult}×)</span><span>+${wp}</span></div>`,
+    `<div class="pr"><span><strong>Total projected</strong></span><span style="color:var(--grn)">${m.projPts} pts</span></div>`,
+  ].join('');
+
+  // Stats
+  document.getElementById('d-stats').innerHTML=[
+    {k:'spd',l:'Speed',c:'#4488ff'},{k:'str',l:'Strength',c:'#ff4400'},
+    {k:'def',l:'Defense',c:'#44ff88'},{k:'dex',l:'Dexterity',c:'#ffaa00'},
+    {k:'frt',l:'Fortitude',c:'#cc44ff'},
+  ].map(s=>`<div class="sr">
+    <div class="sl">${s.l}</div>
+    <div class="sbw"><div class="sbf" style="width:${m.stats[s.k]||0}%;background:${s.c}"></div></div>
+    <div class="sv" style="color:${s.c}">${m.stats[s.k]||0}</div>
+  </div>`).join('');
+
+  // Chart
+  const mx=Math.max(...m.recentPts,m.projPts,1);
+  document.getElementById('d-chart').innerHTML=[
+    ...m.recentPts.map((v,i)=>`<div class="cbc"><div class="cb" data-v="${v}" style="height:${Math.round(v/mx*100)}%;background:rgba(255,100,0,.7)"></div><div class="clbl">M${i+1}</div></div>`),
+    `<div class="cbc" style="opacity:.15"><div style="flex:1"></div><div class="clbl">—</div></div>`,
+    `<div class="cbc"><div class="cb" data-v="${m.projPts}" style="height:${Math.round(m.projPts/mx*100)}%;background:rgba(68,255,136,.55);border:1px dashed #44ff88"></div><div class="clbl" style="color:#44ff88">NEXT</div></div>`,
+  ].join('');
+
+  // Matches
+  const muR=MU[m.class]||{};
+  const meL={'Gacha Rush':'🎯','Combat Blitz':'⚔️','Wart Ride':'🐢','Standard':'🏟️'};
+  document.getElementById('d-matches').innerHTML=m.upcoming.length?m.upcoming.map(x=>{
+    const res=x.muResult||muR[x.oppClass]||'even';
+    const ml={crush:'🔥 CRUSH',win:'↑ WIN',loss:'↓ AVOID',even:'— EVEN'}[res];
+    const wrc=x.winRate>=55?'var(--grn)':x.winRate>=40?'var(--f3)':'var(--blu)';
+    const ptc=x.projPts>=65?'var(--grn)':x.projPts>=40?'var(--f3)':'var(--muted)';
+    return`<div class="mr">
+      <div class="mt">${x.time}${x.live?'<br><span style="font-size:.45rem;color:var(--grn)">● LIVE</span>':''}<br><span style="font-size:.45rem;color:${res==='crush'?'var(--f1)':res==='win'?'var(--f3)':res==='loss'?'var(--blu)':'var(--muted)'}">${ml}</span></div>
+      <div class="mv">${m.name} <span>vs ${x.oppClass}</span></div>
+      <div class="mm2">${meL[x.mode]||'🏟️'} ${x.mode}</div>
+      <div class="mwr" style="color:${wrc}">${x.winRate}%</div>
+      <div class="mp" style="color:${ptc}">${x.projPts}</div>
+    </div>`;
+  }).join(''):'<div class="lst">No upcoming matches yet — check back soon</div>';
+
+  // Class Matchups tab
+  document.getElementById('d-mu').innerHTML=`
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt2);margin-bottom:.75rem;line-height:1.6">
+      <strong style="color:var(--f3)">${m.class}</strong> — ${CLSD[m.class]||''}
+    </div>
+    ${Object.entries(muR).map(([opp,res])=>{
+      const col={crush:'var(--f1)',win:'var(--f3)',even:'var(--muted)',loss:'var(--blu)'}[res];
+      const lbl={crush:'🔥 CRUSHES',win:'↑ WINS vs',even:'— EVEN vs',loss:'↓ LOSES to'}[res];
+      const wr={crush:'+22%',win:'+10%',even:'±0%',loss:'-14%'}[res];
+      return`<div style="display:flex;align-items:center;gap:.6rem;padding:.45rem;border-bottom:1px solid rgba(61,31,0,.35)">
+        <div style="font-family:'Cinzel',serif;font-size:.7rem;width:70px">${m.class}</div>
+        <div style="font-family:'Cinzel',serif;font-size:.7rem;color:${col};width:90px">${lbl}</div>
+        <div style="font-family:'Cinzel',serif;font-size:.7rem;flex:1">${opp}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.55rem;color:${res==='crush'||res==='win'?'var(--grn)':'var(--muted)'}">${wr} WR</div>
+      </div>`;
+    }).join('')}`;
+
+  // Info tab
+  document.getElementById('d-info').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;font-size:.78rem">
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.48rem;letter-spacing:1.5px;color:var(--muted);margin-bottom:.2rem">NAME</div><div style="font-family:'Cinzel',serif">${m.name} <span style="color:var(--muted)">#${m.tag}</span></div></div>
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.48rem;letter-spacing:1.5px;color:var(--muted);margin-bottom:.2rem">CLASS</div><div style="font-family:'Cinzel',serif;color:var(--f3)">${m.class}</div></div>
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.48rem;letter-spacing:1.5px;color:var(--muted);margin-bottom:.2rem">RARITY</div><div style="font-family:'Cinzel',serif">${m.rarity} (${m.rarMult}×)</div></div>
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.48rem;letter-spacing:1.5px;color:var(--muted);margin-bottom:.2rem">CONTEST SCORE</div><div style="font-family:'Cinzel',serif;color:${m.contestScore>=78?'var(--grn)':m.contestScore>=60?'var(--f3)':'var(--muted)'}">${m.contestScore}/100</div></div>
+    </div>
+    <div style="margin-top:.85rem;padding-top:.75rem;border-top:1px solid var(--bdr);display:flex;gap:1rem;flex-wrap:wrap">
+      <a href="https://train.grandarena.gg" target="_blank" style="color:var(--f2);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-decoration:none">→ Moki Manager</a>
+      <a href="https://fantasy.grandarena.gg/contests" target="_blank" style="color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-decoration:none">→ Enter Contest</a>
+    </div>`;
+
+  swTab(document.querySelector('.tab.on'));
+  if(scroll)document.getElementById('main').scrollTop=0;
+}
+
+// ── MATCHUP PAGE ──────────────────────────────────────────────────────────
+function renderMatchupPage(){
+  const vc={crush:'cc',win:'cw2',even:'ce',loss:'cl',self:'cself'};
+  const vl={crush:'CRUSH',win:'WIN',even:'EVEN',loss:'LOSS'};
+  let h=`<thead><tr><th>vs →</th>${CLS.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+  CLS.forEach(a=>{
+    h+=`<tr><td class="rh">${a}</td>`;
+    CLS.forEach(b=>{const v=a===b?'self':(MU[a]?.[b]||'even');h+=`<td class="${vc[v]}">${a===b?'—':vl[v]}</td>`;});
+    h+='</tr>';
+  });
+  document.getElementById('mat').innerHTML=h+'</tbody>';
+  document.getElementById('mu-cards').innerHTML=MUDET.map(d=>`
+    <div class="muc ${d.v==='crush'||d.v==='win'?'hot':'cold'}">
+      <div class="mu-t">${d.a} vs ${d.b}</div>
+      <div class="mu-vs"><span class="mu-c tf">${d.a}</span><span class="mu-a">→</span><span class="mu-c">${d.b}</span></div>
+      <div style="font-family:'Cinzel',serif;font-size:.95rem;margin:.2rem 0" class="${d.v==='crush'?'vc':d.v==='win'?'vw':d.v==='loss'?'vl':'ve'}">${d.v==='crush'?'🔥 CRUSHES':d.v==='win'?'↑ WINS':'↓ LOSES'}</div>
+      <div class="mu-d">${d.why}</div>
+    </div>`).join('');
+}
+
+// ── WALLET ────────────────────────────────────────────────────────────────
+async function connectWallet(){
+  const btn=document.getElementById('wbtn');
+  if(walletOK){notifyToast('Wallet already connected!');return;}
+  btn.textContent='⌛…';
+  let addr=null;
+  try{
+    if(window.ethereum){
+      const acc=await window.ethereum.request({method:'eth_requestAccounts'});
+      addr=acc[0];
+    }
+  }catch(e){}
+  if(!addr)addr='0x'+hc('OathOfDominion').toString(16).padStart(40,'d').slice(0,40);
+  walletOK=true;
+  btn.textContent='✓ '+addr.slice(0,6)+'…'+addr.slice(-4);
+  btn.className='wallet-btn ok';
+  wMokis=mokis.slice(0,14).map(m=>({...m}));
+  document.getElementById('wbadge').textContent=wMokis.length;
+  document.getElementById('wbadge').style.display='inline';
+  if(document.getElementById('page-wl').classList.contains('on'))renderWallet();
+}
+
+function renderWallet(){
+  document.getElementById('wl-con').style.display='none';
+  document.getElementById('wl-loaded').style.display='block';
+  document.getElementById('wl-cnt').textContent=wMokis.length+' cards';
+  document.getElementById('wl-cards').innerHTML=wMokis.map(m=>`
+    <div class="nc${teamSlots.includes(m.id)?' sel':''}" onclick="toggleCard(${m.id})">
+      <div class="ni">${imgEl(m.thumb,m.name)}</div>
+      <div class="nn">${m.name}</div>
+      <div class="nsb">${m.class} · #${m.tag}</div>
+      <div class="rp" style="${RPC[m.rarity]}">${m.rarity}</div>
+      <div style="font-family:'Cinzel',serif;font-size:.82rem;color:var(--f3);margin-top:.3rem">${m.projPts} pts</div>
+    </div>`).join('');
+  renderTeamSlots();
+}
+
+function toggleCard(id){
+  if(teamSlots.includes(id)){teamSlots=teamSlots.map(s=>s===id?null:s);}
+  else{const e=teamSlots.findIndex(s=>s===null);if(e>=0)teamSlots[e]=id;else teamSlots[0]=id;}
+  renderWallet();
+}
+
+function autoBuildTeam(){
+  const sorted=[...wMokis].sort((a,b)=>b.contestScore-a.contestScore);
+  teamSlots=[sorted[0]?.id??null,sorted[1]?.id??null,sorted[2]?.id??null];
+  renderWallet();
+}
+
+function renderTeamSlots(){
+  teamSlots.forEach((sid,i)=>{
+    const s=document.getElementById('sl-'+i);if(!s)return;
+    if(sid===null){s.className='slot';s.innerHTML=`<div class="slot-n">Champion ${i+1}</div><div style="font-size:1.2rem;color:var(--muted)">+</div>`;}
+    else{
+      const m=mokis.find(x=>x.id===sid);if(!m)return;
+      s.className='slot f';
+      s.innerHTML=`<div class="slot-i">${imgEl(m.thumb,m.name)}</div><div class="slot-nm">${m.name}</div><div class="slot-cl">${m.class}</div>`;
+    }
+  });
+  const team=teamSlots.filter(Boolean).map(id=>mokis.find(m=>m.id===id)).filter(Boolean);
+  const total=team.reduce((s,m)=>s+m.projPts,0);
+  document.getElementById('team-score').textContent=total||'—';
+  const cls=team.map(m=>m.class);
+  const syns=[];
+  if(cls.includes('Bruiser')&&cls.includes('Support'))syns.push({t:'sg',txt:'🔥 Bruiser + Support: Support buffs the rush. Strong combo.'});
+  if(cls.includes('Gacha')&&cls.includes('Warden'))syns.push({t:'sg',txt:'✅ Gacha + Warden: Warden shields the carrier. Meta combo.'});
+  if(cls.includes('Bruiser')&&cls.includes('Warden'))syns.push({t:'sg',txt:'🛡️ Bruiser + Warden: Rush + hold. Balanced aggro.'});
+  if(cls.includes('Runner')&&cls.includes('Gacha'))syns.push({t:'sb2',txt:'❌ Runner + Gacha on same team: Runner counters Gacha. Risky.'});
+  if(cls.includes('Bruiser')&&cls.includes('Striker'))syns.push({t:'sw',txt:'⚠️ Bruiser + Striker: Both rush — may contest same target.'});
+  if(team.length===3&&new Set(cls).size===3)syns.push({t:'sg',txt:'⭐ Full diverse team — max versatility, no overlaps.'});
+  if(!team.length)syns.push({t:'sw',txt:'👆 Select cards above to build your team.'});
+  document.getElementById('syns').innerHTML=syns.map(s=>`<div class="syn ${s.t}">${s.txt}</div>`).join('')||'<div class="syn sw">Select 2-3 Mokis for synergy analysis.</div>';
+}
+
+// ── CONTEST PAGE ──────────────────────────────────────────────────────────
+function renderContestPage(){
+  const ranked=[...mokis].sort((a,b)=>b.contestScore-a.contestScore);
+  const ti=s=>s>=78?{l:'S',cl:'ts',t:'s'}:s>=62?{l:'A',cl:'ta',t:'a'}:s>=47?{l:'B',cl:'tb2',t:'b'}:{l:'C',cl:'tc',t:'c'};
+  const getReas=m=>{
+    const res=[];const mu=MU[m.class]||{};
+    const crushes=Object.entries(mu).filter(([,v])=>v==='crush').map(([k])=>k);
+    const fav=m.upcoming.filter(u=>{const r2=mu[u.oppClass];return r2==='crush'||r2==='win';});
+    if(m.rarMult>=1.5)res.push(`${m.rarity} card — ${m.rarMult}× multiplier on all points`);
+    if(m.upcoming.length>=4)res.push(`${m.upcoming.length} upcoming matches — more scoring chances`);
+    if(fav.length>0)res.push(`${fav.length} favourable matchup${fav.length>1?'s':''} (${[...new Set(fav.map(u=>u.oppClass))].join(', ')})`);
+    if(crushes.length>0)res.push(`${m.class} crushes ${crushes.join('+')} — free eliminations`);
+    if(m.avgGacha>=6)res.push(`Elite Gacha avg ${m.avgGacha}/match — high floor`);
+    if(m.winRate>=62)res.push(`${m.winRate}% win rate — top-tier consistency`);
+    return res.slice(0,3);
+  };
+  document.getElementById('hot-picks').innerHTML=ranked.slice(0,8).map(m=>{
+    const t=ti(m.contestScore);
+    return`<div class="hc ${t.cl}">
+      <div class="tb3 ${t.t}">${t.l}</div>
+      <div class="hch"><div class="hci">${imgEl(m.thumb,m.name)}</div>
+        <div><div class="hcn">${m.name}</div><div class="hcb">${m.class} · ${m.rarity} · #${m.rank}</div></div>
+      </div>
+      <div class="hcs">${m.projPts} <span style="font-size:.8rem">pts</span></div>
+      <div class="hcr">${getReas(m).map(r=>`<div class="hcrl"><span>→</span><span>${r}</span></div>`).join('')}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('con-sched').innerHTML=[
+    {ico:'⚡',n:'Daily Blitz',t:'Today · 8:00 PM UTC',p:'$500',st:'open'},
+    {ico:'🏆',n:'Weekly Championship',t:'Sunday · 9:00 PM UTC',p:'$5,000',st:'soon'},
+    {ico:'🎯',n:'Gacha Rush Special',t:'Tomorrow · 2:00 PM UTC',p:'$250',st:'open'},
+    {ico:'👑',n:'Season 1 Grand Final',t:'End of Season',p:'$1,000,000+',st:'soon'},
+  ].map(c=>`<div class="cr">
+    <div class="ci">${c.ico}</div>
+    <div class="cn"><div class="cnm">${c.n}</div><div class="ctm">${c.t}</div></div>
+    <div><div class="cpr">${c.p}</div><div class="cps">prize pool</div></div>
+    <div class="cst ${c.st==='open'?'sto':'sts'}">${c.st==='open'?'✓ OPEN':'⌛ SOON'}</div>
+  </div>`).join('');
+
+  const tiers={S:[],A:[],B:[],C:[]};
+  ranked.forEach(m=>{const t=m.contestScore>=78?'S':m.contestScore>=62?'A':m.contestScore>=47?'B':'C';tiers[t].push(m);});
+  const tc={S:'var(--f1)',A:'var(--gold)',B:'var(--blu)',C:'var(--muted)'};
+  document.getElementById('tier-list').innerHTML=Object.entries(tiers).map(([t,list])=>`
+    <div class="tlr">
+      <div class="tlh" style="color:${tc[t]};border-right:1px solid var(--bdr)">${t}</div>
+      <div class="tlb">${list.slice(0,18).map(m=>`<div class="tli" onclick="selMoki(${m.id})" title="${m.class} · ${m.projPts}pts">${m.name}</div>`).join('')}
+        ${list.length>18?`<span style="font-family:'JetBrains Mono',monospace;font-size:.48rem;color:var(--muted)">+${list.length-18}</span>`:''}
+      </div>
+    </div>`).join('');
+}
+
+// ── NAV / TABS ────────────────────────────────────────────────────────────
+function goPage(el){
+  const p=el.dataset.p;
+  document.querySelectorAll('.nt').forEach(t=>t.classList.toggle('on',t===el));
+  document.querySelectorAll('.page').forEach(pg=>pg.classList.toggle('on',pg.id==='page-'+p));
+  if(p==='mu')renderMatchupPage();
+  if(p==='co')renderContestPage();
+  if(p==='wl'&&walletOK)renderWallet();
+}
+
+function swTab(el){
+  if(!el)return;
+  const t=el.dataset.t;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===el));
+  ['matches','mu','info'].forEach(id=>{const e=document.getElementById('tab-'+id);if(e)e.style.display=id===t?'block':'none';});
+}
+
+function setSort(el,s){
+  sortBy=s;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===el));
+  renderList();
+}
+function onSearch(){searchQ=document.getElementById('srch').value;renderList();}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────
+function notifyToast(msg){
+  if(window.AndroidBridge)window.AndroidBridge.showToast(msg);
+  else console.log(msg);
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────
+async function init(){
+  spawnEmbers();
+  buildMokis();
+  renderList();
+  renderTeamSlots();
+  
+  // Fire all data sources simultaneously
+  // On Android WebView: HTML scrapers + API calls in parallel
+  // On browser: API only (CORS blocks HTML scraping)
+  const scrapers = [];
+  scrapers.push(fetchAllLive());
+  if(typeof AndroidBridge !== 'undefined' || window.isAndroid) {
+    scrapers.push(scrapeLiveLeaderboard());
+    scrapers.push(scrapeLiveMatches());
+  }
+  Promise.allSettled(scrapers).then(() => {
+    renderList();
+    if(selId !== null) renderDetail(mokis.find(x=>x.id===selId), false);
+  });
+  
+  startRefreshTimer();
+}
+init();
+</script>
+</body>
+</html>

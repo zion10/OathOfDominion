@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Oath of Dominion</string>
+    <string name="loading">Summoning the arena…</string>
+    <string name="no_internet">No internet connection. The arena awaits your return.</string>
+</resources>

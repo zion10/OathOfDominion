@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Backgrounds -->
+    <color name="bg_dark">#FF08090F</color>
+    <color name="bg_surface">#FF0C0E1A</color>
+    <color name="bg_card">#FF101320</color>
+    <color name="stone_dark">#FF1A0A00</color>
+
+    <!-- Fire palette -->
+    <color name="fire_red">#FFFF2200</color>
+    <color name="fire_orange">#FFFF6600</color>
+    <color name="fire_amber">#FFFFAA00</color>
+    <color name="fire_yellow">#FFFFDD44</color>
+
+    <!-- Gold -->
+    <color name="gold">#FFE8A020</color>
+    <color name="gold_light">#FFFFD060</color>
+
+    <!-- Accents -->
+    <color name="green">#FF44FF88</color>
+    <color name="blue">#FF4488FF</color>
+    <color name="purple">#FFCC44FF</color>
+
+    <!-- Text -->
+    <color name="text_primary">#FFF5D8B0</color>
+    <color name="text_secondary">#FFC8A070</color>
+    <color name="muted">#FF7A4020</color>
+
+    <!-- Borders -->
+    <color name="border_dark">#FF3D1F00</color>
+    <color name="border_medium">#FF6B3010</color>
+
+    <!-- Status bar -->
+    <color name="status_bar">#FF08090F</color>
+</resources>
